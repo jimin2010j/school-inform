@@ -104,10 +104,13 @@
             80% { opacity: 1; }
             100% { transform: translate(105vw, 50px) rotate(45deg); opacity: 0; }
         }
-        @keyframes swimFish {
-            0% { transform: translateX(-15vw); }
-            50% { transform: translateX(50vw) translateY(-8px); }
-            100% { transform: translateX(110vw); }
+        /* Corrected Fish Swimming with Forward Facing Head (No scaleX(-1) flipping backward) */
+        @keyframes swimFishCorrect {
+            0% { transform: translateX(-15vw) translateY(0px); }
+            25% { transform: translateX(25vw) translateY(-25px) rotate(8deg); }
+            50% { transform: translateX(50vw) translateY(15px) rotate(-6deg); }
+            75% { transform: translateX(75vw) translateY(-20px) rotate(5deg); }
+            100% { transform: translateX(110vw) translateY(0px); }
         }
         @keyframes swayTree {
             0%, 100% { transform: rotate(0deg); }
@@ -138,7 +141,7 @@
         .anim-wave { animation: waveMove 6s ease-in-out infinite; }
         .anim-wave-slow { animation: waveMove 9s ease-in-out infinite; }
         .anim-dolphin-jump { animation: dolphinArcJump 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite; }
-        .anim-swim-fish { animation: swimFish 16s linear infinite; }
+        .anim-swim-fish-correct { animation: swimFishCorrect 14s ease-in-out infinite; }
         .anim-sway { transform-origin: bottom center; animation: swayTree 5s ease-in-out infinite; }
         .anim-bunny-bounce { animation: bunnyBounce 2s ease-in-out infinite; }
         .anim-bunny-dance { animation: bunnyDance 1.2s ease-in-out infinite; }
@@ -184,19 +187,19 @@
         <!-- Ocean Water Background Layer -->
         <div class="absolute bottom-0 w-full h-[55vh] bg-gradient-to-b from-ocean via-[#50B2FC] to-sand"></div>
 
-        <!-- JUMPING DOLPHIN ANIMATION LAYER (ONLY DOLPHIN ICON, NO TEXT) -->
-        <div id="dolphinContainer" class="hidden absolute bottom-[40vh] left-0 w-full pointer-events-none z-10">
+        <!-- JUMPING DOLPHIN ANIMATION LAYER -->
+        <div id="dolphinContainer" class="hidden absolute bottom-[42vh] left-0 w-full pointer-events-none z-10">
             <div class="anim-dolphin-jump flex items-center gap-1 text-sky-100">
                 <span class="text-6xl filter drop-shadow-lg transform -rotate-12">🐬</span>
             </div>
         </div>
 
-        <!-- SWIMMING TROPICAL FISH LAYER -->
-        <div id="fishContainer" class="hidden absolute bottom-[38vh] left-0 w-full pointer-events-none z-10">
-            <div class="anim-swim-fish flex items-center gap-5">
-                <span class="text-4xl text-amber-300 filter drop-shadow">🐠</span>
-                <span class="text-3xl text-rose-300 filter drop-shadow">🐟</span>
-                <span class="text-4xl text-yellow-200 filter drop-shadow">🐡</span>
+        <!-- SWIMMING TROPICAL FISH LAYER (Forward Facing Head + Dynamic Up/Down) -->
+        <div id="fishContainer" class="hidden absolute bottom-[44vh] left-0 w-full pointer-events-none z-10">
+            <div class="anim-swim-fish-correct flex items-center gap-6">
+                <span class="text-5xl text-amber-300 filter drop-shadow-md transform scale-x-[-1]">🐠</span>
+                <span class="text-4xl text-rose-300 filter drop-shadow-md transform scale-x-[-1]">🐟</span>
+                <span class="text-5xl text-yellow-200 filter drop-shadow-md transform scale-x-[-1]">🐡</span>
             </div>
         </div>
 
@@ -354,8 +357,8 @@
                             <!-- Ice Cream Accessory Overlay -->
                             <g id="acc-icecream" class="hidden">
                                 <path d="M 140,150 L 150,170 L 160,150 Z" fill="#D8B568" />
-                                <circle cx="150" cy="144" r="12" fill="#FF8FA8" />
-                                <circle cx="150" cy="136" r="9" fill="#FFF9EC" />
+                                <circle id="iceCreamScoop1" cx="150" cy="144" r="12" fill="#7B3F00" />
+                                <circle id="iceCreamScoop2" cx="150" cy="136" r="9" fill="#FFF9EC" />
                             </g>
 
                             <!-- Sunglasses Overlay -->
@@ -380,7 +383,7 @@
 
                 <!-- Action Buttons for Pet -->
                 <div class="mt-4 flex gap-2">
-                    <button onclick="petAction('feed')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
+                    <button onclick="openIceCreamMenu()" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
                         <span>🍦</span> 간식 주기
                     </button>
                     <button onclick="petAction('sleep')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
@@ -526,6 +529,43 @@
         </footer>
     </div>
 
+    <!-- MODAL: ICE CREAM FLAVOR SELECTOR -->
+    <div id="iceCreamModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card bg-cream text-navy rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col gap-4 border-2 border-white animate-fade-in">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <span>🍦</span> 아이스크림 맛 선택하기
+                </h2>
+                <button onclick="closeIceCreamMenu()" class="text-navy/70 hover:text-navy text-xl">&times;</button>
+            </div>
+
+            <p class="text-xs text-navy/70">토끼에게 줄 신나고 달콤한 아이스크림 맛을 골라주세요!</p>
+
+            <div class="grid grid-cols-1 gap-2 text-xs font-bold">
+                <button onclick="feedIceCream('choco')" class="bg-amber-900/10 hover:bg-amber-900/20 text-amber-900 p-3 rounded-2xl flex items-center justify-between border border-amber-900/30 transition">
+                    <span class="flex items-center gap-2">🍫 찐한 달콤 초코 맛</span>
+                    <span>선택 &rarr;</span>
+                </button>
+                <button onclick="feedIceCream('strawberry')" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 p-3 rounded-2xl flex items-center justify-between border border-rose-500/30 transition">
+                    <span class="flex items-center gap-2">🍓 상큼한 딸기 맛</span>
+                    <span>선택 &rarr;</span>
+                </button>
+                <button onclick="feedIceCream('vanilla')" class="bg-amber-400/10 hover:bg-amber-400/20 text-amber-700 p-3 rounded-2xl flex items-center justify-between border border-amber-400/30 transition">
+                    <span class="flex items-center gap-2">🍦 부드러운 바닐라 맛</span>
+                    <span>선택 &rarr;</span>
+                </button>
+                <button onclick="feedIceCream('yogurt')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 p-3 rounded-2xl flex items-center justify-between border border-emerald-500/30 transition">
+                    <span class="flex items-center gap-2">🥛 깔끔한 요거트 맛</span>
+                    <span>선택 &rarr;</span>
+                </button>
+                <button onclick="feedIceCream('blueberry')" class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 p-3 rounded-2xl flex items-center justify-between border border-indigo-500/30 transition">
+                    <span class="flex items-center gap-2">🫐 톡톡 씹히는 블루베리 맛</span>
+                    <span>선택 &rarr;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL 1: SETTINGS -->
     <div id="settingsModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card-dark bg-navy/80 text-white rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 border border-white/30 animate-fade-in">
@@ -594,11 +634,11 @@
                 <button onclick="closeShopModal()" class="text-navy/70 hover:text-navy text-xl">&times;</button>
             </div>
 
-            <p class="text-xs text-navy/70">별사탕으로 토끼 코스튬, 해변 바다 생물 및 5가지 날씨 테마를 꾸며보세요!</p>
+            <p class="text-xs text-navy/70">별사탕으로 구매한 아이스크림과 악세사리를 자유롭게 착용 및 해제해보세요!</p>
 
             <!-- SHOP CATEGORY 1: COSTUMES -->
             <div class="flex flex-col gap-2">
-                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">👒 토끼 액세서리</h3>
+                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">👒 토끼 액세서리 (착용/해제 가능)</h3>
                 <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">🕶️</span>
@@ -607,7 +647,7 @@
                             <div class="text-[10px] text-navy/60">토끼 눈 보호</div>
                         </div>
                     </div>
-                    <button onclick="buyItem('sunglasses', 10)" id="btn-item-sunglasses" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                    <button onclick="toggleItem('sunglasses', 10)" id="btn-item-sunglasses" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow transition">
                         ⭐ 10 착용
                     </button>
                 </div>
@@ -619,7 +659,7 @@
                             <div class="text-[10px] text-navy/60">햇볕을 가려줘요</div>
                         </div>
                     </div>
-                    <button onclick="buyItem('hat', 15)" id="btn-item-hat" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                    <button onclick="toggleItem('hat', 15)" id="btn-item-hat" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow transition">
                         ⭐ 15 착용
                     </button>
                 </div>
@@ -627,16 +667,16 @@
 
             <!-- SHOP CATEGORY 2: OCEAN ANIMALS -->
             <div class="flex flex-col gap-2 mt-2">
-                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">🐬 바다 생물 등장</h3>
+                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">🐬 바다 생물 (소환/소환 해제 가능)</h3>
                 <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">🐬</span>
                         <div>
-                            <div class="font-bold text-xs md:text-sm">아기 돌고래 소환</div>
+                            <div class="font-bold text-xs md:text-sm">아기 돌고래</div>
                             <div class="text-[10px] text-navy/60">바다 위로 신나게 점프하는 돌고래</div>
                         </div>
                     </div>
-                    <button onclick="toggleOceanAnimal('dolphinTheme')" id="btn-item-dolphinTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                    <button onclick="toggleItem('dolphinTheme', 20)" id="btn-item-dolphinTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow transition">
                         ⭐ 20 소환
                     </button>
                 </div>
@@ -648,7 +688,7 @@
                             <div class="text-[10px] text-navy/60">바닷속을 헤엄치는 물고기들</div>
                         </div>
                     </div>
-                    <button onclick="toggleOceanAnimal('fishTheme')" id="btn-item-fishTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                    <button onclick="toggleItem('fishTheme', 15)" id="btn-item-fishTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow transition">
                         ⭐ 15 소환
                     </button>
                 </div>
@@ -720,7 +760,13 @@
                 fishTheme: false,
                 dolphinTheme: false
             },
-            currentWeather: 'sunny', // 'sunny', 'sunset', 'night', 'rainy', 'snowy'
+            itemsEquipped: {
+                sunglasses: false,
+                hat: false,
+                fishTheme: false,
+                dolphinTheme: false
+            },
+            currentWeather: 'sunny',
             audioMuted: true,
             currentMonth: new Date(),
             schedules: {},
@@ -775,7 +821,7 @@
             }
         }
 
-        // --- MULTI-WEATHER CANVAS SYSTEM (Sparkles Yoonseul / Rain / Snow / Night Stars) ---
+        // --- MULTI-WEATHER CANVAS SYSTEM ---
         let canvasParticles = [];
 
         function initCanvas() {
@@ -795,7 +841,6 @@
                 const weather = appState.currentWeather;
 
                 if (weather === 'sunny' || weather === 'sunset') {
-                    // Yoonseul Water Sparkles
                     for (let i = 0; i < 70; i++) {
                         canvasParticles.push({
                             x: Math.random() * w,
@@ -807,7 +852,6 @@
                         });
                     }
                 } else if (weather === 'rainy') {
-                    // Rain drops
                     for (let i = 0; i < 90; i++) {
                         canvasParticles.push({
                             x: Math.random() * w,
@@ -818,7 +862,6 @@
                         });
                     }
                 } else if (weather === 'snowy') {
-                    // Snow flakes
                     for (let i = 0; i < 80; i++) {
                         canvasParticles.push({
                             x: Math.random() * w,
@@ -829,7 +872,6 @@
                         });
                     }
                 } else if (weather === 'night') {
-                    // Night Stars & Fireflies
                     for (let i = 0; i < 60; i++) {
                         canvasParticles.push({
                             x: Math.random() * w,
@@ -969,7 +1011,7 @@
             activeBtn.classList.add('glass-card', 'opacity-100');
         }
 
-        // --- NEIS API FETCH FUNCTIONS ---
+        // --- ACCURATE NEIS API FETCH FUNCTIONS ---
         async function fetchAcademicSchedule(year, month) {
             const monthStr = String(month).padStart(2, '0');
             const lastDate = new Date(year, month, 0).getDate();
@@ -987,16 +1029,20 @@
                 if (data.SchoolSchedule && data.SchoolSchedule[1]?.row) {
                     const list = data.SchoolSchedule[1].row;
                     list.forEach(item => {
-                        if (!item.EVENT_NM || item.EVENT_NM.trim() === '') return;
+                        const eventName = item.EVENT_NM ? item.EVENT_NM.trim() : '';
+                        if (!eventName) return;
                         
                         let type = "📌";
-                        if (item.EVENT_NM.includes("고사") || item.EVENT_NM.includes("시험") || item.EVENT_NM.includes("평가")) type = "📚";
-                        else if (item.EVENT_NM.includes("방학")) type = "🏖️";
-                        else if (item.EVENT_NM.includes("축제") || item.EVENT_NM.includes("체육") || item.EVENT_NM.includes("대회")) type = "🎆";
-                        else if (item.EVENT_NM.includes("체험") || item.EVENT_NM.includes("수련") || item.EVENT_NM.includes("견학")) type = "🚌";
-                        else if (item.EVENT_NM.includes("졸업") || item.EVENT_NM.includes("입학")) type = "🎓";
+                        if (eventName.includes("고사") || eventName.includes("시험") || eventName.includes("평가")) type = "📚";
+                        else if (eventName.includes("방학")) type = "🏖️";
+                        else if (eventName.includes("축제") || eventName.includes("체육") || eventName.includes("대회")) type = "🎆";
+                        else if (eventName.includes("체험") || eventName.includes("수련") || eventName.includes("견학")) type = "🚌";
+                        else if (eventName.includes("졸업") || eventName.includes("입학")) type = "🎓";
 
-                        map[item.AA_YMD] = { name: item.EVENT_NM, type };
+                        if (!map[item.AA_YMD]) {
+                            map[item.AA_YMD] = [];
+                        }
+                        map[item.AA_YMD].push({ name: eventName, type });
                     });
                 }
                 appState.schedules = map;
@@ -1082,7 +1128,7 @@
 
             for (let i = 0; i < firstDay; i++) {
                 const empty = document.createElement('div');
-                empty.className = "h-20 md:h-24 rounded-2xl bg-white/10";
+                empty.className = "h-20 md:h-28 rounded-2xl bg-white/10";
                 grid.appendChild(empty);
             }
 
@@ -1090,32 +1136,42 @@
 
             for (let d = 1; d <= lastDate; d++) {
                 const dateKey = `${year}${String(month + 1).padStart(2, '0')}${String(d).padStart(2, '0')}`;
-                const hasEvent = appState.schedules[dateKey];
+                const eventsList = appState.schedules[dateKey] || [];
                 const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
 
                 const cell = document.createElement('div');
-                cell.className = `h-20 md:h-24 rounded-2xl p-1.5 md:p-2 flex flex-col justify-between transition-transform duration-200 hover:scale-105 cursor-pointer border ${isToday ? 'bg-sunYellow/80 border-coral shadow-md' : 'bg-white/50 border-white/80'}`;
+                cell.className = `h-20 md:h-28 rounded-2xl p-1 md:p-1.5 flex flex-col justify-between transition-transform duration-200 hover:scale-105 cursor-pointer border ${isToday ? 'bg-sunYellow/80 border-coral shadow-md' : 'bg-white/50 border-white/80'}`;
 
                 cell.onclick = () => {
-                    if (hasEvent) {
-                        alert(`🐚 [${d}일 일정] ${hasEvent.name}`);
+                    if (eventsList.length > 0) {
+                        const names = eventsList.map(e => `${e.type} ${e.name}`).join('\n');
+                        alert(`🐚 [${d}일 일정]\n${names}`);
                         appState.shells += 1;
                         document.getElementById('shellCount').textContent = appState.shells;
                         playSound('coin');
                     }
                 };
 
+                let eventsHtml = '';
+                if (eventsList.length > 0) {
+                    eventsHtml = `<div class="flex flex-col gap-0.5 overflow-y-auto max-h-[50px]">`;
+                    eventsList.forEach(ev => {
+                        eventsHtml += `
+                            <div class="bg-white/90 rounded-lg px-1 py-0.5 text-[9px] md:text-[10px] text-navy font-bold leading-tight flex items-center gap-0.5 shadow-sm truncate" title="${ev.name}">
+                                <span>${ev.type}</span>
+                                <span class="truncate">${ev.name}</span>
+                            </div>
+                        `;
+                    });
+                    eventsHtml += `</div>`;
+                }
+
                 cell.innerHTML = `
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-xs md:text-sm ${isToday ? 'text-navy font-extrabold' : 'text-navy/80'}">${d}</span>
                         ${isToday ? '<span class="text-xs">🐚</span>' : ''}
                     </div>
-                    ${hasEvent ? `
-                        <div class="bg-white/80 rounded-xl p-1 text-[10px] md:text-xs text-navy font-semibold flex items-center gap-1 shadow-sm truncate" title="${hasEvent.name}">
-                            <span>${hasEvent.type}</span>
-                            <span class="truncate">${hasEvent.name}</span>
-                        </div>
-                    ` : '<div class="h-4"></div>'}
+                    ${eventsHtml || '<div class="h-4"></div>'}
                 `;
                 grid.appendChild(cell);
             }
@@ -1175,8 +1231,9 @@
             const ymdKey = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
 
             const schedBox = document.getElementById('todayScheduleBox');
-            if (appState.schedules[ymdKey]) {
-                schedBox.innerHTML = `<span class="text-base mr-1">${appState.schedules[ymdKey].type}</span> <strong>${appState.schedules[ymdKey].name}</strong>`;
+            if (appState.schedules[ymdKey] && appState.schedules[ymdKey].length > 0) {
+                const eventNames = appState.schedules[ymdKey].map(e => `${e.type} ${e.name}`).join(', ');
+                schedBox.innerHTML = `<strong>${eventNames}</strong>`;
             } else {
                 schedBox.innerHTML = `🏖️ 특별한 학사일정이 없어요. 신나게 노는 날!`;
             }
@@ -1191,7 +1248,7 @@
             document.getElementById('todayDateStr').textContent = `${today.getFullYear()}.${today.getMonth()+1}.${today.getDate()} (${['일','월','화','수','목','금','토'][today.getDay()]})`;
         }
 
-        // --- PET INTERACTION & PET CARE (FEED / SLEEP / DANCE) ---
+        // --- PET INTERACTION & ICE CREAM FLAVOR SELECTION ---
         function setBunnySpeech(text) {
             const speechBox = document.getElementById('bunnySpeech');
             const speechText = document.getElementById('speechText');
@@ -1205,7 +1262,7 @@
             playSound('bubble');
             const responses = [
                 "야호! 바닷바람이 정말 시원해! 😊",
-                "배고프다! 맛있는 거 먹으러 가자 🍦",
+                "배고프다! 맛있는 아이스크림 먹으러 가자 🍦",
                 "학사일정 확인하고 조개 모았어? 🐚",
                 "나 오늘 그을린 피부 어때? 예쁘지? ✨",
                 "바다에 반짝이는 윤슬 구경하자! 🌊"
@@ -1214,6 +1271,65 @@
             setBunnySpeech(rand);
 
             appState.candies += 1;
+            document.getElementById('candyCount').textContent = appState.candies;
+        }
+
+        function openIceCreamMenu() {
+            playSound('bubble');
+            document.getElementById('iceCreamModal').classList.remove('hidden');
+        }
+
+        function closeIceCreamMenu() {
+            document.getElementById('iceCreamModal').classList.add('hidden');
+        }
+
+        function feedIceCream(flavor) {
+            closeIceCreamMenu();
+            playSound('coin');
+
+            const bunnyGraphic = document.getElementById('bunnyGraphic');
+            const eyesNormal = document.getElementById('eyesNormal');
+            const eyesSleeping = document.getElementById('eyesSleeping');
+            const zzzBubble = document.getElementById('zzzBubble');
+            const icecreamAcc = document.getElementById('acc-icecream');
+            const scoop1 = document.getElementById('iceCreamScoop1');
+            const scoop2 = document.getElementById('iceCreamScoop2');
+            const petStateText = document.getElementById('petStateText');
+
+            bunnyGraphic.className = "relative w-44 h-44 md:w-56 md:h-56 anim-bunny-bounce";
+            eyesNormal.classList.remove('hidden');
+            eyesSleeping.classList.add('hidden');
+            zzzBubble.classList.add('hidden');
+            icecreamAcc.classList.remove('hidden');
+
+            if (flavor === 'choco') {
+                scoop1.setAttribute('fill', '#4A2311');
+                scoop2.setAttribute('fill', '#6A351C');
+                setBunnySpeech("🍫 와아! 달콤하고 진한 초코 아이스크림 최고야! 냠냠!");
+                petStateText.textContent = "🍫 초코 아이스크림 냠냠";
+            } else if (flavor === 'strawberry') {
+                scoop1.setAttribute('fill', '#FF6B8B');
+                scoop2.setAttribute('fill', '#FFB3C1');
+                setBunnySpeech("🍓 새콤달콤 상큼한 딸기 아이스크림 너무 맛있어! 고마워!");
+                petStateText.textContent = "🍓 딸기 아이스크림 냠냠";
+            } else if (flavor === 'vanilla') {
+                scoop1.setAttribute('fill', '#FFF5C0');
+                scoop2.setAttribute('fill', '#FFFEE0');
+                setBunnySpeech("🍦 부드러운 고소한 바닐라 아이스크림! 입에서 사르르 녹아!");
+                petStateText.textContent = "🍦 바닐라 아이스크림 냠냠";
+            } else if (flavor === 'yogurt') {
+                scoop1.setAttribute('fill', '#AEEED8');
+                scoop2.setAttribute('fill', '#E6FFFA');
+                setBunnySpeech("🥛 깔끔하고 시원한 요거트 아이스크림! 기분이 너무 좋아!");
+                petStateText.textContent = "🥛 요거트 아이스크림 냠냠";
+            } else if (flavor === 'blueberry') {
+                scoop1.setAttribute('fill', '#6B5B95');
+                scoop2.setAttribute('fill', '#92A8D1');
+                setBunnySpeech("🫐 톡톡 씹히는 달콤한 블루베리 아이스크림! 취향저격이야!");
+                petStateText.textContent = "🫐 블루베리 아이스크림 냠냠";
+            }
+
+            appState.candies += 3;
             document.getElementById('candyCount').textContent = appState.candies;
         }
 
@@ -1232,12 +1348,7 @@
             zzzBubble.classList.add('hidden');
             icecreamAcc.classList.add('hidden');
 
-            if (type === 'feed') {
-                icecreamAcc.classList.remove('hidden');
-                bunnyGraphic.classList.add('anim-bunny-bounce');
-                setBunnySpeech("🍦 와아! 맛있는 소프트 아이스크림이다! 고마워 냠냠!");
-                petStateText.textContent = "🍦 아이스크림 냠냠";
-            } else if (type === 'sleep') {
+            if (type === 'sleep') {
                 eyesNormal.classList.add('hidden');
                 eyesSleeping.classList.remove('hidden');
                 zzzBubble.classList.remove('hidden');
@@ -1271,68 +1382,86 @@
             alert("📜 파도에 떠내려온 유리병 편지를 열었습니다!\n\n'여름 캠퍼스에 온 걸 환영해!'\n🎁 보상: 조개 5개 + 별사탕 10개 획득!");
         }
 
-        // --- SHOP & ACCESSORY & ANIMAL SELECTION ---
+        // --- SHOP & ACCESSORY & TOGGLE SYSTEM ---
         function openShopModal() {
             playSound('bubble');
+            updateShopUI();
             document.getElementById('shopModal').classList.remove('hidden');
         }
+
         function closeShopModal() {
             document.getElementById('shopModal').classList.add('hidden');
         }
 
-        function buyItem(itemKey, cost) {
-            if (appState.candies < cost) {
-                alert("별사탕이 부족해요! 토끼와 대화하거나 일정을 확인해서 별사탕을 모아주세요.");
-                return;
-            }
-            playSound('coin');
-            appState.candies -= cost;
-            appState.itemsOwned[itemKey] = true;
-            document.getElementById('candyCount').textContent = appState.candies;
-
-            if (itemKey === 'sunglasses' || itemKey === 'hat') {
-                document.getElementById(`acc-${itemKey}`).classList.remove('hidden');
-            }
-
-            const btn = document.getElementById(`btn-item-${itemKey}`);
-            if (btn) {
-                btn.innerText = "착용 중";
-                btn.disabled = true;
-                btn.className = "bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow cursor-default";
-            }
-
-            setBunnySpeech(`✨ 예쁜 액세서리를 선물해줘서 고마워!! 💖`);
-        }
-
-        // Toggle Ocean Animals (Dolphin / Fish)
-        function toggleOceanAnimal(animalKey) {
-            const cost = animalKey === 'dolphinTheme' ? 20 : 15;
-            if (!appState.itemsOwned[animalKey]) {
+        function toggleItem(itemKey, cost) {
+            if (!appState.itemsOwned[itemKey]) {
                 if (appState.candies < cost) {
-                    alert("별사탕이 부족해요!");
+                    alert("별사탕이 부족해요! 토끼와 대화하거나 일정을 확인해서 별사탕을 모아주세요.");
                     return;
                 }
+                playSound('coin');
                 appState.candies -= cost;
-                appState.itemsOwned[animalKey] = true;
+                appState.itemsOwned[itemKey] = true;
+                appState.itemsEquipped[itemKey] = true;
                 document.getElementById('candyCount').textContent = appState.candies;
+                setBunnySpeech(`✨ 예쁜 아이템을 새로 장만했어!! 고마워 💖`);
+            } else {
+                playSound('bubble');
+                appState.itemsEquipped[itemKey] = !appState.itemsEquipped[itemKey];
+                if (appState.itemsEquipped[itemKey]) {
+                    setBunnySpeech(`✨ 짜잔! 다시 착용했어! 💖`);
+                } else {
+                    setBunnySpeech(`😊 아이템을 상자에 살포시 넣어두었어!`);
+                }
             }
 
-            playSound('coin');
-            if (animalKey === 'dolphinTheme') {
+            const isEquipped = appState.itemsEquipped[itemKey];
+            if (itemKey === 'sunglasses' || itemKey === 'hat') {
+                const accElem = document.getElementById(`acc-${itemKey}`);
+                if (accElem) {
+                    if (isEquipped) accElem.classList.remove('hidden');
+                    else accElem.classList.add('hidden');
+                }
+            } else if (itemKey === 'dolphinTheme') {
                 const el = document.getElementById('dolphinContainer');
-                el.classList.remove('hidden');
-                setBunnySpeech("🐬 우와! 아기 돌고래가 바다 위로 점프해!!");
-            } else if (animalKey === 'fishTheme') {
+                if (el) {
+                    if (isEquipped) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
+            } else if (itemKey === 'fishTheme') {
                 const el = document.getElementById('fishContainer');
-                el.classList.remove('hidden');
-                setBunnySpeech("🐠 바닷속에 알록달록 예쁜 열대어 무리가 헤엄치기 시작했어!");
+                if (el) {
+                    if (isEquipped) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
             }
 
-            const btn = document.getElementById(`btn-item-${animalKey}`);
-            if (btn) {
-                btn.innerText = "소환 중";
-                btn.disabled = true;
-                btn.className = "bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow cursor-default";
+            updateShopUI();
+        }
+
+        function updateShopUI() {
+            updateButtonState('sunglasses', 10, '착용');
+            updateButtonState('hat', 15, '착용');
+            updateButtonState('dolphinTheme', 20, '소환');
+            updateButtonState('fishTheme', 15, '소환');
+        }
+
+        function updateButtonState(itemKey, cost, actionNoun) {
+            const btn = document.getElementById(`btn-item-${itemKey}`);
+            if (!btn) return;
+
+            const isOwned = appState.itemsOwned[itemKey];
+            const isEquipped = appState.itemsEquipped[itemKey];
+
+            if (!isOwned) {
+                btn.innerText = `⭐ ${cost} ${actionNoun}`;
+                btn.className = "bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow transition";
+            } else if (isEquipped) {
+                btn.innerText = `✅ ${actionNoun} 중 (해제)`;
+                btn.className = "bg-emerald-400 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow transition";
+            } else {
+                btn.innerText = `✨ ${actionNoun}하기`;
+                btn.className = "bg-sky-400 hover:bg-sky-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow transition";
             }
         }
 
@@ -1349,22 +1478,26 @@
             }
 
             if (q.includes('시험') || q.includes('고사') || q.includes('기말') || q.includes('중간') || q.includes('평가')) {
-                for (const [date, item] of Object.entries(appState.schedules)) {
-                    if (item.name.includes('시험') || item.name.includes('고사') || item.name.includes('평가')) {
-                        const month = date.substring(4, 6);
-                        const day = date.substring(6, 8);
-                        return `시험 일정은 ${parseInt(month)}월 ${parseInt(day)}일 (${item.name})이야! 차근차근 준비하자 📚✨`;
+                for (const [date, items] of Object.entries(appState.schedules)) {
+                    for (const item of items) {
+                        if (item.name.includes('시험') || item.name.includes('고사') || item.name.includes('평가')) {
+                            const month = date.substring(4, 6);
+                            const day = date.substring(6, 8);
+                            return `시험 일정은 ${parseInt(month)}월 ${parseInt(day)}일 (${item.name})이야! 차근차근 준비하자 📚✨`;
+                        }
                     }
                 }
                 return "확인해봤는데 당분간 시험 일정은 없어! 마음 편히 여름을 즐기자 😊📚";
             }
 
             if (q.includes('방학') || q.includes('휴가')) {
-                for (const [date, item] of Object.entries(appState.schedules)) {
-                    if (item.name.includes('방학')) {
-                        const month = date.substring(4, 6);
-                        const day = date.substring(6, 8);
-                        return `방학 일정은 ${parseInt(month)}월 ${parseInt(day)}일이야! 시원한 바다에서 놀 준비하자 🏖️🎉`;
+                for (const [date, items] of Object.entries(appState.schedules)) {
+                    for (const item of items) {
+                        if (item.name.includes('방학')) {
+                            const month = date.substring(4, 6);
+                            const day = date.substring(6, 8);
+                            return `방학 일정은 ${parseInt(month)}월 ${parseInt(day)}일이야! 시원한 바다에서 놀 준비하자 🏖️🎉`;
+                        }
                     }
                 }
                 return "지금은 이미 신나는 방학 시즌이야! 나랑 모래사장에서 놀자 🌊";
@@ -1373,8 +1506,9 @@
             if (q.includes('오늘') || q.includes('일정') || q.includes('뭐해') || q.includes('뭐 해')) {
                 const today = new Date();
                 const ymdKey = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-                if (appState.schedules[ymdKey]) {
-                    return `오늘 학사일정은 [${appState.schedules[ymdKey].name}]이야! 활기차게 보내자 🎈`;
+                if (appState.schedules[ymdKey] && appState.schedules[ymdKey].length > 0) {
+                    const names = appState.schedules[ymdKey].map(e => e.name).join(', ');
+                    return `오늘 학사일정은 [${names}]이야! 활기차게 보내자 🎈`;
                 }
                 return "오늘은 특별한 학사일정이 없네! 시원한 바닷가에서 즐거운 마음으로 놀자 🏖️✨";
             }
