@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDKs (Compat / Modular via CDN) -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -30,7 +30,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Expose to global scope for app logic
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -273,7 +272,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button id="audioBtn" onclick="toggleAudio()" class="glass-btn w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center text-navy shadow-sm" title="배경음/효과음">
+                <button id="audioBtn" onclick="toggleAudio()" class="glass-btn w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center text-navy shadow-sm" title="바다 파도 소리 켜기/끄기">
                     <i class="fa-solid fa-volume-xmark text-lg"></i>
                 </button>
                 <button onclick="openSettingsModal()" class="glass-btn px-3 py-2 rounded-2xl flex items-center gap-1.5 text-navy font-semibold text-xs md:text-sm shadow-sm">
@@ -518,7 +517,7 @@
             </div>
         </main>
 
-        <!-- TAB CONTENT 4: COMMUNITY BOARD (NEW) -->
+        <!-- TAB CONTENT 4: COMMUNITY BOARD -->
         <main id="content-board" class="tab-content hidden flex-1 flex flex-col gap-4">
             <div class="glass-card rounded-3xl p-4 md:p-6 flex flex-col gap-4">
                 <div class="flex justify-between items-center flex-wrap gap-2 border-b border-navy/10 pb-3">
@@ -796,51 +795,81 @@
             meals: []
         };
 
-        // Audio Context Setup
+        // --- WEB AUDIO API OCEAN AMBIENT SOUND GENERATOR ---
         let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
+        let oceanSourceNode = null;
+        let oceanGainNode = null;
+        let noiseFilterNode = null;
+        let filterModLFO = null;
 
-        function playSound(type) {
-            if (appState.audioMuted) return;
+        function initOceanAudio() {
+            if (audioCtx) return;
             try {
-                initAudio();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'bubble') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.1);
-                } else if (type === 'coin') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-                    osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.08);
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Buffer size for white noise (5 seconds)
+                const bufferSize = audioCtx.sampleRate * 5;
+                const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
                 }
-            } catch (e) {}
+
+                // White Noise Source
+                const whiteNoise = audioCtx.createBufferSource();
+                whiteNoise.buffer = noiseBuffer;
+                whiteNoise.loop = true;
+
+                // Lowpass Filter for soft ocean wave rumble
+                noiseFilterNode = audioCtx.createBiquadFilter();
+                noiseFilterNode.type = 'lowpass';
+                noiseFilterNode.frequency.setValueAtTime(350, audioCtx.currentTime);
+                noiseFilterNode.Q.setValueAtTime(3, audioCtx.currentTime);
+
+                // LFO to simulate rolling wave crashes (period ~6 seconds)
+                filterModLFO = audioCtx.createOscillator();
+                filterModLFO.frequency.setValueAtTime(0.18, audioCtx.currentTime);
+                
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(250, audioCtx.currentTime);
+
+                filterModLFO.connect(lfoGain);
+                lfoGain.connect(noiseFilterNode.frequency);
+
+                // Main Volume Gain
+                oceanGainNode = audioCtx.createGain();
+                oceanGainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+
+                whiteNoise.connect(noiseFilterNode);
+                noiseFilterNode.connect(oceanGainNode);
+                oceanGainNode.connect(audioCtx.destination);
+
+                whiteNoise.start();
+                filterModLFO.start();
+                oceanSourceNode = whiteNoise;
+            } catch (e) {
+                console.log("AudioContext error:", e);
+            }
         }
 
         function toggleAudio() {
             appState.audioMuted = !appState.audioMuted;
             const btn = document.getElementById('audioBtn');
+            
             if (appState.audioMuted) {
+                if (oceanGainNode && audioCtx) {
+                    oceanGainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                }
                 btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-lg"></i>`;
             } else {
+                initOceanAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                if (oceanGainNode && audioCtx) {
+                    oceanGainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.5);
+                }
                 btn.innerHTML = `<i class="fa-solid fa-volume-high text-lg text-coral"></i>`;
-                playSound('bubble');
             }
         }
 
@@ -986,7 +1015,6 @@
 
         // --- CHANGE WEATHER ---
         function changeWeather(weatherMode) {
-            playSound('coin');
             appState.currentWeather = weatherMode;
 
             const bgLayer = document.getElementById('bgLayer');
@@ -1021,7 +1049,6 @@
 
         // --- UI TAB NAVIGATION ---
         function switchTab(tabName) {
-            playSound('bubble');
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('glass-card', 'opacity-100');
@@ -1053,7 +1080,6 @@
             }
 
             try {
-                playSound('coin');
                 await window.addDoc(window.collection(window.db, "boardPosts"), {
                     writer: writer,
                     content: content,
@@ -1285,7 +1311,6 @@
         }
 
         function changeMonth(delta) {
-            playSound('bubble');
             appState.currentMonth.setMonth(appState.currentMonth.getMonth() + delta);
             fetchAcademicSchedule(appState.currentMonth.getFullYear(), appState.currentMonth.getMonth() + 1);
         }
@@ -1326,7 +1351,6 @@
         }
 
         function praiseMeal(date) {
-            playSound('coin');
             appState.candies += 2;
             document.getElementById('candyCount').textContent = appState.candies;
             setBunnySpeech(`😋 ${date} 급식 정말 맛있겠다! 별사탕 2개 적립! ⭐`);
@@ -1366,7 +1390,6 @@
         }
 
         function interactBunny() {
-            playSound('bubble');
             const responses = [
                 "야호! 바닷바람이 정말 시원해! 😊",
                 "배고프다! 맛있는 아이스크림 먹으러 가자 🍦",
@@ -1382,7 +1405,6 @@
         }
 
         function openIceCreamMenu() {
-            playSound('bubble');
             document.getElementById('iceCreamModal').classList.remove('hidden');
         }
 
@@ -1392,7 +1414,6 @@
 
         function feedIceCream(flavor) {
             closeIceCreamMenu();
-            playSound('coin');
 
             const bunnyGraphic = document.getElementById('bunnyGraphic');
             const eyesNormal = document.getElementById('eyesNormal');
@@ -1441,7 +1462,6 @@
         }
 
         function petAction(type) {
-            playSound('coin');
             const bunnyGraphic = document.getElementById('bunnyGraphic');
             const eyesNormal = document.getElementById('eyesNormal');
             const eyesSleeping = document.getElementById('eyesSleeping');
@@ -1480,7 +1500,6 @@
         }
 
         function claimRandomEvent() {
-            playSound('coin');
             document.getElementById('eventMessage').classList.add('hidden');
             appState.shells += 5;
             appState.candies += 10;
@@ -1491,7 +1510,6 @@
 
         // --- SHOP & ACCESSORY & TOGGLE SYSTEM ---
         function openShopModal() {
-            playSound('bubble');
             updateShopUI();
             document.getElementById('shopModal').classList.remove('hidden');
         }
@@ -1506,14 +1524,12 @@
                     alert("별사탕이 부족해요! 토끼와 대화하거나 일정을 확인해서 별사탕을 모아주세요.");
                     return;
                 }
-                playSound('coin');
                 appState.candies -= cost;
                 appState.itemsOwned[itemKey] = true;
                 appState.itemsEquipped[itemKey] = true;
                 document.getElementById('candyCount').textContent = appState.candies;
                 setBunnySpeech(`✨ 예쁜 아이템을 새로 장만했어!! 고마워 💖`);
             } else {
-                playSound('bubble');
                 appState.itemsEquipped[itemKey] = !appState.itemsEquipped[itemKey];
                 if (appState.itemsEquipped[itemKey]) {
                     setBunnySpeech(`✨ 짜잔! 다시 착용했어! 💖`);
@@ -1687,7 +1703,6 @@
 
             addChatMessage('bunny', resultText);
             setBunnySpeech(resultText);
-            playSound('bubble');
 
             appState.candies += 2;
             document.getElementById('candyCount').textContent = appState.candies;
@@ -1727,7 +1742,6 @@
 
         // --- SETTINGS MODAL ---
         function openSettingsModal() {
-            playSound('bubble');
             document.getElementById('settingsModal').classList.remove('hidden');
         }
         function closeSettingsModal() {
@@ -1778,7 +1792,6 @@
         }
 
         function selectSchool(code, name, office) {
-            playSound('coin');
             appState.schoolCode = code;
             appState.schoolName = name;
             appState.officeCode = office;
@@ -1805,7 +1818,6 @@
             fetchAcademicSchedule(appState.currentMonth.getFullYear(), appState.currentMonth.getMonth() + 1);
             fetchWeeklyMeals();
 
-            // Initialize Firestore Board Listener
             initBoardRealtimeListener();
 
             setTimeout(triggerRandomEvent, 2000);
