@@ -87,7 +87,7 @@
             border-radius: 10px;
         }
 
-        /* CSS Animations for Beach Environment */
+        /* Dynamic Animations */
         @keyframes floatSlow {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(2deg); }
@@ -97,12 +97,17 @@
             50% { transform: translateX(-25px) scaleY(1.05); }
             100% { transform: translateX(0) scaleY(1); }
         }
-        @keyframes swimDolphin {
-            0% { transform: translateX(-100px) translateY(0); opacity: 0; }
-            30% { opacity: 0.6; }
-            50% { transform: translateX(50vw) translateY(-20px); }
-            70% { opacity: 0.6; }
-            100% { transform: translateX(110vw) translateY(0); opacity: 0; }
+        @keyframes dolphinArcJump {
+            0% { transform: translate(-10vw, 40px) rotate(-35deg); opacity: 0; }
+            20% { opacity: 1; }
+            50% { transform: translate(45vw, -90px) rotate(15deg); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translate(105vw, 50px) rotate(45deg); opacity: 0; }
+        }
+        @keyframes swimFish {
+            0% { transform: translateX(-15vw); }
+            50% { transform: translateX(50vw) translateY(-8px); }
+            100% { transform: translateX(110vw); }
         }
         @keyframes swayTree {
             0%, 100% { transform: rotate(0deg); }
@@ -112,28 +117,34 @@
             0%, 100% { transform: translateY(0) scale(1, 1); }
             50% { transform: translateY(-12px) scale(1.03, 0.97); }
         }
-        @keyframes bunnyIdle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        @keyframes bunnyDance {
+            0% { transform: translateY(0) rotate(0deg) scale(1); }
+            20% { transform: translateY(-18px) rotate(-12deg) scale(1.08); }
+            40% { transform: translateY(0) rotate(12deg) scale(0.95); }
+            60% { transform: translateY(-18px) rotate(-12deg) scale(1.08); }
+            80% { transform: translateY(0) rotate(12deg) scale(0.95); }
+            100% { transform: translateY(0) rotate(0deg) scale(1); }
         }
-        @keyframes crabWalk {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(40px); }
+        @keyframes bunnySleep {
+            0%, 100% { transform: translateY(4px) scale(0.98, 0.95); }
+            50% { transform: translateY(8px) scale(1.02, 0.92); }
         }
-        @keyframes cloudFly {
-            0% { transform: translateX(-15vw); }
-            100% { transform: translateX(105vw); }
+        @keyframes zzzFloat {
+            0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(20px, -35px) scale(1.2); opacity: 0; }
         }
 
         .anim-wave { animation: waveMove 6s ease-in-out infinite; }
         .anim-wave-slow { animation: waveMove 9s ease-in-out infinite; }
-        .anim-dolphin { animation: swimDolphin 22s ease-in-out infinite; }
+        .anim-dolphin-jump { animation: dolphinArcJump 12s cubic-bezier(0.25, 0.1, 0.25, 1) infinite; }
+        .anim-swim-fish { animation: swimFish 16s linear infinite; }
         .anim-sway { transform-origin: bottom center; animation: swayTree 5s ease-in-out infinite; }
         .anim-bunny-bounce { animation: bunnyBounce 2s ease-in-out infinite; }
-        .anim-bunny-idle { animation: bunnyIdle 3s ease-in-out infinite; }
+        .anim-bunny-dance { animation: bunnyDance 1.2s ease-in-out infinite; }
+        .anim-bunny-sleep { animation: bunnySleep 3s ease-in-out infinite; }
         .anim-float { animation: floatSlow 4s ease-in-out infinite; }
-        .anim-crab { animation: crabWalk 7s ease-in-out infinite; }
-        .anim-cloud { animation: cloudFly 45s linear infinite; }
+        .anim-zzz { animation: zzzFloat 2.5s ease-in-out infinite; }
 
         /* Canvas Overlay styles */
         #bgCanvas {
@@ -142,19 +153,19 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0;
+            z-index: 1;
             pointer-events: none;
         }
     </style>
 </head>
 <body class="min-h-screen relative text-slate-800 bg-sky overflow-x-hidden font-sans">
 
-    <!-- Background Dynamic Canvas -->
+    <!-- Background Dynamic Canvas for Weather Effects -->
     <canvas id="bgCanvas"></canvas>
 
-    <!-- Background Elements Container (SVG & Animated Layers) -->
-    <div id="bgLayer" class="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000">
-        <!-- Sun/Moon Element -->
+    <!-- Background Elements Container -->
+    <div id="bgLayer" class="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-sky">
+        <!-- Celestial Body (Sun/Moon) -->
         <div id="celestial" class="absolute top-8 right-12 w-20 h-20 rounded-full bg-sunYellow shadow-[0_0_50px_#FFD34D] transition-all duration-1000 anim-float"></div>
 
         <!-- Flying Clouds -->
@@ -165,18 +176,29 @@
             <i class="fa-solid fa-cloud text-white text-5xl filter drop-shadow-md"></i>
         </div>
 
-        <!-- Sky Birds / Seagulls -->
+        <!-- Sky Birds -->
         <div class="absolute top-20 left-1/3 opacity-70 anim-float" style="animation-duration: 7s;">
             <i class="fa-solid fa-dove text-white text-xl transform -rotate-12"></i>
         </div>
 
-        <!-- Dolphin Shadow in Distant Ocean -->
-        <div class="absolute top-[42%] left-0 anim-dolphin opacity-40 text-navy">
-            <i class="fa-solid fa-fish text-3xl transform rotate-12"></i>
-        </div>
-
         <!-- Ocean Water Background Layer -->
         <div class="absolute bottom-0 w-full h-[55vh] bg-gradient-to-b from-ocean via-[#50B2FC] to-sand"></div>
+
+        <!-- JUMPING DOLPHIN ANIMATION LAYER (ONLY DOLPHIN ICON, NO TEXT) -->
+        <div id="dolphinContainer" class="hidden absolute bottom-[40vh] left-0 w-full pointer-events-none z-10">
+            <div class="anim-dolphin-jump flex items-center gap-1 text-sky-100">
+                <span class="text-6xl filter drop-shadow-lg transform -rotate-12">🐬</span>
+            </div>
+        </div>
+
+        <!-- SWIMMING TROPICAL FISH LAYER -->
+        <div id="fishContainer" class="hidden absolute bottom-[38vh] left-0 w-full pointer-events-none z-10">
+            <div class="anim-swim-fish flex items-center gap-5">
+                <span class="text-4xl text-amber-300 filter drop-shadow">🐠</span>
+                <span class="text-3xl text-rose-300 filter drop-shadow">🐟</span>
+                <span class="text-4xl text-yellow-200 filter drop-shadow">🐡</span>
+            </div>
+        </div>
 
         <!-- Wave Layers -->
         <svg class="absolute bottom-[35vh] w-[120%] -left-[10%] h-24 text-ocean opacity-70 anim-wave" viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -189,35 +211,15 @@
         <!-- Sand Beach Ground Layer -->
         <div class="absolute bottom-0 w-full h-[32vh] bg-sand border-t-8 border-[#F0D59D] rounded-t-[40px] shadow-inner"></div>
 
-        <!-- Beach Decorations (Palm trees, Parasol, Shells, Crab) -->
-        <!-- Palm Tree Left -->
+        <!-- Beach Trees & Parasol -->
         <div class="absolute bottom-[28vh] left-2 md:left-12 anim-sway text-emerald-600 text-6xl md:text-8xl">
             <i class="fa-solid fa-tree"></i>
         </div>
-        <!-- Palm Tree Right -->
         <div class="absolute bottom-[28vh] right-4 md:right-16 anim-sway text-emerald-700 text-7xl md:text-9xl" style="animation-delay: -2s;">
             <i class="fa-solid fa-tree"></i>
         </div>
-
-        <!-- Parasol & Drink -->
         <div class="absolute bottom-[10vh] left-[8%] md:left-[18%] text-coral text-4xl md:text-6xl anim-float">
             <i class="fa-solid fa-umbrella-beach"></i>
-        </div>
-        <div class="absolute bottom-[8vh] left-[14%] md:left-[22%] text-sunYellow text-2xl md:text-3xl">
-            <i class="fa-solid fa-wine-glass-drop"></i>
-        </div>
-
-        <!-- Little Crab -->
-        <div class="absolute bottom-[6vh] right-[25%] text-coral text-xl md:text-2xl anim-crab">
-            <i class="fa-solid fa-crab"></i>
-        </div>
-
-        <!-- Starfish & Shells on Sand -->
-        <div class="absolute bottom-[4vh] left-[40%] text-amber-500 text-xl transform rotate-12">
-            <i class="fa-solid fa-star"></i>
-        </div>
-        <div class="absolute bottom-[7vh] right-[35%] text-rose-300 text-lg transform -rotate-45">
-            <i class="fa-solid fa-spaghetti-monster-flying"></i>
         </div>
     </div>
 
@@ -226,7 +228,6 @@
 
         <!-- HEADER / NAVIGATION NAVBAR -->
         <header class="w-full glass-card rounded-3xl p-3 md:p-4 mb-4 flex flex-wrap justify-between items-center gap-3">
-            <!-- Brand Logo -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
                 <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-coral flex items-center justify-center text-white text-xl md:text-2xl font-bold shadow-md transform hover:rotate-6 transition-transform">
                     🌴
@@ -237,14 +238,14 @@
                 </div>
             </div>
 
-            <!-- Currency Stats (Shells & Star Candies) -->
+            <!-- Currency Stats -->
             <div class="flex items-center gap-2 md:gap-4 bg-white/60 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl border border-white/80 shadow-sm text-xs md:text-sm">
-                <div class="flex items-center gap-1.5 text-navy font-bold" title="조개껍데기 (일정 확인 시 획득)">
+                <div class="flex items-center gap-1.5 text-navy font-bold" title="조개껍데기">
                     <span class="text-base md:text-xl">🐚</span>
                     <span id="shellCount">12</span>
                 </div>
                 <div class="h-4 w-[1px] bg-navy/20"></div>
-                <div class="flex items-center gap-1.5 text-coral font-bold" title="별사탕 (출석 및 대화 시 획득)">
+                <div class="flex items-center gap-1.5 text-coral font-bold" title="별사탕">
                     <span class="text-base md:text-xl">⭐</span>
                     <span id="candyCount">45</span>
                 </div>
@@ -253,7 +254,7 @@
                 </button>
             </div>
 
-            <!-- Action Controls (Audio, Settings, Help) -->
+            <!-- Action Controls -->
             <div class="flex items-center gap-2">
                 <button id="audioBtn" onclick="toggleAudio()" class="glass-btn w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center text-navy shadow-sm" title="배경음/효과음">
                     <i class="fa-solid fa-volume-xmark text-lg"></i>
@@ -281,31 +282,29 @@
         <!-- TAB CONTENT 1: HOME & PET STAGE -->
         <main id="content-home" class="tab-content flex-1 flex flex-col justify-between gap-4">
 
-            <!-- Floating Event Bottle Banner -->
             <div id="eventMessage" class="hidden glass-card rounded-2xl p-3 text-center text-navy font-semibold text-sm animate-bounce cursor-pointer flex items-center justify-center gap-2 border-2 border-sunYellow" onclick="claimRandomEvent()">
                 <span>📜</span> <span id="eventText">바닷가에 편지지가 든 유리병이 떠내려왔어요! (클릭해서 열기)</span>
             </div>
 
-            <!-- Pet Interactive Playground Area -->
+            <!-- Pet Playground Area -->
             <div class="relative w-full h-[320px] md:h-[400px] flex flex-col items-center justify-center my-auto">
 
                 <!-- Bunny Speech Bubble -->
                 <div id="bunnySpeech" class="glass-card px-5 py-3 rounded-3xl max-w-xs md:max-w-md text-center text-navy font-bold text-sm md:text-base shadow-lg mb-4 relative transition-all duration-300 transform scale-100 animate-pulse">
                     <span id="speechText">안녕! 오늘도 바닷가 캠퍼스에 온 걸 환영해 🏖️</span>
-                    <!-- Bubble Tail -->
+                    <!-- Zzz Sleep Bubble -->
+                    <div id="zzzBubble" class="hidden absolute -top-6 -right-2 text-navy font-extrabold text-xl anim-zzz">Zzz... 🌙</div>
                     <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white/60 rotate-45 border-r border-b border-white/60"></div>
                 </div>
 
-                <!-- Tanned Bunny Avatar Graphic -->
+                <!-- Pet Avatar with Accessories -->
                 <div id="bunnyAvatarContainer" onclick="interactBunny()" class="relative cursor-pointer group transition-transform duration-200 active:scale-95">
 
-                    <!-- Glow Effect -->
                     <div class="absolute -inset-4 bg-sunYellow/30 rounded-full blur-xl group-hover:bg-coral/40 transition-all"></div>
 
                     <!-- Custom SVG Tanned Bunny Character -->
                     <div id="bunnyGraphic" class="relative w-44 h-44 md:w-56 md:h-56 anim-bunny-bounce">
                         <svg viewBox="0 0 200 200" class="w-full h-full filter drop-shadow-xl">
-                            <!-- Bunny Ears -->
                             <!-- Left Ear -->
                             <ellipse cx="70" cy="45" rx="16" ry="40" fill="#E8C39E" transform="rotate(-15 70 45)" />
                             <ellipse cx="70" cy="45" rx="9" ry="28" fill="#FF8FA8" transform="rotate(-15 70 45)" />
@@ -313,100 +312,100 @@
                             <ellipse cx="130" cy="45" rx="16" ry="40" fill="#E8C39E" transform="rotate(15 130 45)" />
                             <ellipse cx="130" cy="45" rx="9" ry="28" fill="#FF8FA8" transform="rotate(15 130 45)" />
 
-                            <!-- Bunny Head (Tanned Cream/Beige Tone #E8C39E) -->
+                            <!-- Bunny Head -->
                             <circle cx="100" cy="95" r="50" fill="#E8C39E" />
 
-                            <!-- Cheeks (Blush) -->
+                            <!-- Cheeks -->
                             <circle cx="70" cy="105" r="10" fill="#FF8FA8" opacity="0.6" />
                             <circle cx="130" cy="105" r="10" fill="#FF8FA8" opacity="0.6" />
 
-                            <!-- Big Cute Eyes -->
-                            <ellipse cx="80" cy="92" rx="6" ry="9" fill="#214C8C" />
-                            <circle cx="82" cy="89" r="2.5" fill="#FFFFFF" />
-                            <ellipse cx="120" cy="92" rx="6" ry="9" fill="#214C8C" />
-                            <circle cx="122" cy="89" r="2.5" fill="#FFFFFF" />
+                            <!-- EYES NORMAL -->
+                            <g id="eyesNormal">
+                                <ellipse cx="80" cy="92" rx="6" ry="9" fill="#214C8C" />
+                                <circle cx="82" cy="89" r="2.5" fill="#FFFFFF" />
+                                <ellipse cx="120" cy="92" rx="6" ry="9" fill="#214C8C" />
+                                <circle cx="122" cy="89" r="2.5" fill="#FFFFFF" />
+                            </g>
 
-                            <!-- Nose & Smile Mouth -->
+                            <!-- EYES SLEEPING -->
+                            <g id="eyesSleeping" class="hidden">
+                                <path d="M 72,94 Q 80,84 88,94" fill="none" stroke="#214C8C" stroke-width="3.5" stroke-linecap="round" />
+                                <path d="M 112,94 Q 120,84 128,94" fill="none" stroke="#214C8C" stroke-width="3.5" stroke-linecap="round" />
+                            </g>
+
+                            <!-- Nose & Mouth -->
                             <polygon points="100,100 96,104 104,104" fill="#FF8FA8" />
                             <path d="M 94,108 Q 100,115 106,108" fill="none" stroke="#214C8C" stroke-width="2.5" stroke-linecap="round" />
 
-                            <!-- Tanned Body -->
+                            <!-- Body -->
                             <ellipse cx="100" cy="155" rx="38" ry="32" fill="#E8C39E" />
-
-                            <!-- Cute Belly -->
                             <ellipse cx="100" cy="158" rx="24" ry="20" fill="#FFF9EC" />
 
-                            <!-- Paws / Arms -->
+                            <!-- Paws -->
                             <ellipse cx="65" cy="150" rx="10" ry="16" fill="#E8C39E" transform="rotate(20 65 150)" />
                             <ellipse cx="135" cy="150" rx="10" ry="16" fill="#E8C39E" transform="rotate(-20 135 150)" />
 
-                            <!-- Feet & Pink Paw Pads -->
+                            <!-- Feet -->
                             <ellipse cx="78" cy="182" rx="12" ry="8" fill="#E8C39E" />
                             <circle cx="78" cy="182" r="4" fill="#FF8FA8" />
                             <ellipse cx="122" cy="182" rx="12" ry="8" fill="#E8C39E" />
                             <circle cx="122" cy="182" r="4" fill="#FF8FA8" />
 
-                            <!-- COSTUME OVERLAYS (Dynamically controlled via JS/Store) -->
-                            <!-- Sunglasses -->
+                            <!-- Ice Cream Accessory Overlay -->
+                            <g id="acc-icecream" class="hidden">
+                                <path d="M 140,150 L 150,170 L 160,150 Z" fill="#D8B568" />
+                                <circle cx="150" cy="144" r="12" fill="#FF8FA8" />
+                                <circle cx="150" cy="136" r="9" fill="#FFF9EC" />
+                            </g>
+
+                            <!-- Sunglasses Overlay -->
                             <g id="acc-sunglasses" class="hidden">
                                 <rect x="62" y="82" width="32" height="20" rx="6" fill="#214C8C" />
                                 <rect x="106" y="82" width="32" height="20" rx="6" fill="#214C8C" />
                                 <line x1="94" y1="90" x2="106" y2="90" stroke="#214C8C" stroke-width="3" />
-                                <line x1="66" y1="86" x2="80" y2="96" stroke="#FFFFFF" stroke-width="2" opacity="0.5" />
-                                <line x1="110" y1="86" x2="124" y2="96" stroke="#FFFFFF" stroke-width="2" opacity="0.5" />
                             </g>
 
-                            <!-- Straw Hat -->
+                            <!-- Straw Hat Overlay -->
                             <g id="acc-hat" class="hidden">
                                 <path d="M 50,55 Q 100,20 150,55" fill="#F8E3B2" stroke="#D8B568" stroke-width="3" />
                                 <ellipse cx="100" cy="55" rx="58" ry="10" fill="#F8E3B2" stroke="#D8B568" stroke-width="3" />
-                                <path d="M 65,53 Q 100,42 135,53" fill="none" stroke="#FF8FA8" stroke-width="5" />
-                            </g>
-
-                            <!-- Swim Tube -->
-                            <g id="acc-tube" class="hidden">
-                                <ellipse cx="100" cy="165" rx="46" ry="16" fill="none" stroke="#FF8FA8" stroke-width="14" />
-                                <ellipse cx="100" cy="165" rx="46" ry="16" fill="none" stroke="#FFD34D" stroke-width="14" stroke-dasharray="25 25" />
                             </g>
                         </svg>
                     </div>
 
-                    <!-- Pet Status Bubble (Mood / Action) -->
                     <div class="absolute -bottom-2 right-0 glass-btn px-3 py-1 rounded-full text-xs font-bold text-navy shadow-sm">
-                        <span id="petStateText">🏖️ 낮잠 자기</span>
+                        <span id="petStateText">🏖️ 해변 산책 중</span>
                     </div>
                 </div>
 
                 <!-- Action Buttons for Pet -->
                 <div class="mt-4 flex gap-2">
-                    <button onclick="petAction('feed')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm">
+                    <button onclick="petAction('feed')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
                         <span>🍦</span> 간식 주기
                     </button>
-                    <button onclick="petAction('play')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm">
-                        <span>🏖️</span> 모래놀이
+                    <button onclick="petAction('sleep')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
+                        <span>😴</span> 낮잠 자기
                     </button>
-                    <button onclick="petAction('dance')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm">
+                    <button onclick="petAction('dance')" class="glass-btn px-3.5 py-1.5 rounded-full text-xs font-bold text-navy flex items-center gap-1 shadow-sm hover:scale-105 transition">
                         <span>💃</span> 춤추기
                     </button>
                 </div>
             </div>
 
-            <!-- Today's Notice / Message in a Bottle Display -->
+            <!-- Today's Notice Display -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Today's Schedule Bottled Card -->
                 <div class="glass-card rounded-3xl p-4 flex flex-col justify-between">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="font-bold text-navy text-base flex items-center gap-2">
                             <span>📜</span> 오늘 학사일정
                         </h3>
-                        <span id="todayDateStr" class="text-xs text-navy/70 font-semibold">2026.07.27 (월)</span>
+                        <span id="todayDateStr" class="text-xs text-navy/70 font-semibold">오늘 날짜</span>
                     </div>
                     <div id="todayScheduleBox" class="bg-white/50 rounded-2xl p-3 text-sm text-navy min-h-[60px] flex items-center justify-center font-medium">
                         학사일정을 불러오는 중입니다...
                     </div>
                 </div>
 
-                <!-- Today's Meal Card -->
                 <div class="glass-card rounded-3xl p-4 flex flex-col justify-between">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="font-bold text-navy text-base flex items-center gap-2">
@@ -429,7 +428,6 @@
                     <span class="text-xs text-navy/60">학교 일정이나 급식에 대해 물어보세요!</span>
                 </div>
 
-                <!-- Chat Messages History Box -->
                 <div id="chatHistory" class="bg-white/40 rounded-2xl p-3 h-36 overflow-y-auto flex flex-col gap-2.5 text-xs md:text-sm">
                     <div class="flex items-start gap-2">
                         <div class="w-7 h-7 rounded-full bg-coral flex items-center justify-center text-xs shrink-0">🐰</div>
@@ -439,7 +437,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Prompt Chips -->
                 <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs">
                     <button onclick="sendQuickChat('기말고사는 언제야?')" class="glass-btn px-2.5 py-1 rounded-xl whitespace-nowrap text-navy">
                         📚 기말고사 언제야?
@@ -455,7 +452,6 @@
                     </button>
                 </div>
 
-                <!-- Input Chat Bar -->
                 <div class="flex items-center gap-2">
                     <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="토끼에게 질문해 보세요..." class="flex-1 bg-white/70 border border-white rounded-2xl px-4 py-2.5 text-xs md:text-sm text-navy placeholder-navy/50 focus:outline-none focus:ring-2 focus:ring-coral">
                     <button onclick="sendChatMessage()" class="bg-coral hover:bg-rose-400 text-white font-bold px-4 py-2.5 rounded-2xl text-xs md:text-sm shadow-md transition">
@@ -468,7 +464,6 @@
         <!-- TAB CONTENT 2: ACADEMIC CALENDAR -->
         <main id="content-schedule" class="tab-content hidden flex-1 flex flex-col gap-4">
             <div class="glass-card rounded-3xl p-4 md:p-6 flex flex-col gap-4">
-                <!-- Calendar Header & Navigation -->
                 <div class="flex flex-wrap justify-between items-center gap-2">
                     <div>
                         <h2 class="text-xl md:text-2xl font-bold text-navy flex items-center gap-2">
@@ -478,12 +473,11 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <button onclick="changeMonth(-1)" class="glass-btn w-9 h-9 rounded-2xl text-navy font-bold">&lt;</button>
-                        <span id="calendarMonthStr" class="font-bold text-navy text-base md:text-lg">2026년 7월</span>
+                        <span id="calendarMonthStr" class="font-bold text-navy text-base md:text-lg">월 표시</span>
                         <button onclick="changeMonth(1)" class="glass-btn w-9 h-9 rounded-2xl text-navy font-bold">&gt;</button>
                     </div>
                 </div>
 
-                <!-- Days of Week Header -->
                 <div class="grid grid-cols-7 text-center font-bold text-xs md:text-sm text-navy/80 border-b border-navy/10 pb-2">
                     <span class="text-rose-500">일</span>
                     <span>월</span>
@@ -494,12 +488,8 @@
                     <span class="text-sky-600">토</span>
                 </div>
 
-                <!-- Calendar Days Grid -->
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 md:gap-2">
-                    <!-- Javascript populates days here -->
-                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 md:gap-2"></div>
 
-                <!-- Legend of Schedule Icons -->
                 <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-navy/80 pt-3 border-t border-navy/10">
                     <span class="flex items-center gap-1">📚 시험</span>
                     <span class="flex items-center gap-1">🏖️ 방학</span>
@@ -519,17 +509,14 @@
                         <h2 class="text-xl md:text-2xl font-bold text-navy flex items-center gap-2">
                             <span>🍱</span> 이번 주 맛있고 신나는 식단표
                         </h2>
-                        <p class="text-xs text-navy/70">영양만점 해변 학교 급식 메뉴를 확인하세요!</p>
+                        <p class="text-xs text-navy/70">영양만점 학교 급식 메뉴를 확인하세요!</p>
                     </div>
                     <div class="text-xs font-semibold bg-white/60 px-3 py-1.5 rounded-xl border border-white text-navy" id="mealWeekStr">
-                        월요일 ~ 금요일 식단
+                        이번 주 식단
                     </div>
                 </div>
 
-                <!-- Weekly Meals List Cards -->
-                <div id="weeklyMealContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    <!-- Populated dynamically -->
-                </div>
+                <div id="weeklyMealContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"></div>
             </div>
         </main>
 
@@ -539,7 +526,7 @@
         </footer>
     </div>
 
-    <!-- MODAL 1: SCHOOL SEARCH & API SETTINGS -->
+    <!-- MODAL 1: SETTINGS -->
     <div id="settingsModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card-dark bg-navy/80 text-white rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 border border-white/30 animate-fade-in">
             <div class="flex justify-between items-center">
@@ -549,20 +536,17 @@
                 <button onclick="closeSettingsModal()" class="text-white/70 hover:text-white text-xl">&times;</button>
             </div>
 
-            <!-- NEIS API KEY Input -->
             <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-sky">나이스 오픈 API Key (선택)</label>
-                <input type="text" id="apiKeyInput" placeholder="API Key 입력 (미입력 시 샘플 데이터 작동)" class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs md:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-coral">
-                <p class="text-[10px] text-white/60">* API Key가 없어도 귀여운 기본 샘플 데이터로 체험이 가능합니다.</p>
+                <input type="text" id="apiKeyInput" placeholder="API Key 입력 (미입력 시에도 검색 가능)" class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs md:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-coral">
+                <p class="text-[10px] text-white/60">* API Key가 없어도 실제 나이스 학사일정 및 급식을 가져옵니다.</p>
             </div>
 
             <hr class="border-white/10">
 
-            <!-- School Search Section -->
             <div class="flex flex-col gap-3">
                 <label class="text-xs font-semibold text-sky">학교 찾기</label>
 
-                <!-- Office of Education Select -->
                 <select id="officeSelect" class="bg-slate-800 text-white border border-white/20 rounded-xl px-3 py-2 text-xs md:text-sm focus:outline-none">
                     <option value="B10">서울특별시교육청</option>
                     <option value="C10">부산광역시교육청</option>
@@ -583,13 +567,11 @@
                     <option value="T10">제주특별자치도교육청</option>
                 </select>
 
-                <!-- Search Input Bar -->
                 <div class="flex gap-2">
                     <input type="text" id="schoolNameInput" placeholder="학교명 (예: 한국고등학교)" class="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs md:text-sm text-white placeholder-white/40 focus:outline-none">
                     <button onclick="searchSchool()" class="bg-coral hover:bg-rose-500 font-bold px-4 py-2 rounded-xl text-xs shadow">검색</button>
                 </div>
 
-                <!-- School Search Results List -->
                 <div id="schoolResults" class="max-h-36 overflow-y-auto bg-black/20 rounded-xl p-2 flex flex-col gap-1 text-xs">
                     <div class="text-white/60 text-center py-2">학교를 검색해 주세요.</div>
                 </div>
@@ -602,63 +584,119 @@
         </div>
     </div>
 
-    <!-- MODAL 2: ITEM SHOP -->
+    <!-- MODAL 2: EXPANDED SHOP MODAL -->
     <div id="shopModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="glass-card bg-cream text-navy rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 border-2 border-white animate-fade-in">
+        <div class="glass-card bg-cream text-navy rounded-3xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col gap-4 border-2 border-white animate-fade-in">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold flex items-center gap-2">
-                    <span>🛍️</span> 해변 별사탕 상점
+                    <span>🛍️</span> 해변 별사탕 상점 & 날씨
                 </h2>
                 <button onclick="closeShopModal()" class="text-navy/70 hover:text-navy text-xl">&times;</button>
             </div>
 
-            <p class="text-xs text-navy/70">출석하고 일정 확인해서 모은 별사탕으로 토끼를 꾸며주세요!</p>
+            <p class="text-xs text-navy/70">별사탕으로 토끼 코스튬, 해변 바다 생물 및 5가지 날씨 테마를 꾸며보세요!</p>
 
-            <div class="grid grid-cols-1 gap-2.5">
-                <!-- Shop Item 1: Sunglasses -->
+            <!-- SHOP CATEGORY 1: COSTUMES -->
+            <div class="flex flex-col gap-2">
+                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">👒 토끼 액세서리</h3>
                 <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">🕶️</span>
                         <div>
                             <div class="font-bold text-xs md:text-sm">멋쟁이 선글라스</div>
-                            <div class="text-[10px] text-navy/60">토끼의 눈을 보호해줘요</div>
+                            <div class="text-[10px] text-navy/60">토끼 눈 보호</div>
                         </div>
                     </div>
                     <button onclick="buyItem('sunglasses', 10)" id="btn-item-sunglasses" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
-                        ⭐ 10 구매
+                        ⭐ 10 착용
                     </button>
                 </div>
-
-                <!-- Shop Item 2: Straw Hat -->
                 <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">👒</span>
                         <div>
                             <div class="font-bold text-xs md:text-sm">여름 밀짚모자</div>
-                            <div class="text-[10px] text-navy/60">햇볕으로부터 시원하게</div>
+                            <div class="text-[10px] text-navy/60">햇볕을 가려줘요</div>
                         </div>
                     </div>
                     <button onclick="buyItem('hat', 15)" id="btn-item-hat" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
-                        ⭐ 15 구매
-                    </button>
-                </div>
-
-                <!-- Shop Item 3: Swim Tube -->
-                <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">🛟</span>
-                        <div>
-                            <div class="font-bold text-xs md:text-sm">알록달록 튜브</div>
-                            <div class="text-[10px] text-navy/60">파도타기의 필수품!</div>
-                        </div>
-                    </div>
-                    <button onclick="buyItem('tube', 20)" id="btn-item-tube" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
-                        ⭐ 20 구매
+                        ⭐ 15 착용
                     </button>
                 </div>
             </div>
 
-            <div class="text-right mt-2">
+            <!-- SHOP CATEGORY 2: OCEAN ANIMALS -->
+            <div class="flex flex-col gap-2 mt-2">
+                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">🐬 바다 생물 등장</h3>
+                <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🐬</span>
+                        <div>
+                            <div class="font-bold text-xs md:text-sm">아기 돌고래 소환</div>
+                            <div class="text-[10px] text-navy/60">바다 위로 신나게 점프하는 돌고래</div>
+                        </div>
+                    </div>
+                    <button onclick="toggleOceanAnimal('dolphinTheme')" id="btn-item-dolphinTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                        ⭐ 20 소환
+                    </button>
+                </div>
+                <div class="bg-white/80 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🐠</span>
+                        <div>
+                            <div class="font-bold text-xs md:text-sm">알록달록 열대어 무리</div>
+                            <div class="text-[10px] text-navy/60">바닷속을 헤엄치는 물고기들</div>
+                        </div>
+                    </div>
+                    <button onclick="toggleOceanAnimal('fishTheme')" id="btn-item-fishTheme" class="bg-sunYellow hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs text-navy shadow">
+                        ⭐ 15 소환
+                    </button>
+                </div>
+            </div>
+
+            <!-- SHOP CATEGORY 3: 5 WEATHER THEMES -->
+            <div class="flex flex-col gap-2 mt-2">
+                <h3 class="font-bold text-xs text-coral uppercase tracking-wider">🌤️ 5가지 해변 날씨 선택</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <button onclick="changeWeather('sunny')" class="bg-white/80 hover:bg-white p-2.5 rounded-2xl flex items-center gap-2 border shadow-sm">
+                        <span class="text-2xl">☀️</span>
+                        <div class="text-left">
+                            <div class="font-bold">햇빛 쨍쨍한 날</div>
+                            <div class="text-[10px] text-navy/60">반짝이는 바다 윤슬</div>
+                        </div>
+                    </button>
+                    <button onclick="changeWeather('sunset')" class="bg-white/80 hover:bg-white p-2.5 rounded-2xl flex items-center gap-2 border shadow-sm">
+                        <span class="text-2xl">🌅</span>
+                        <div class="text-left">
+                            <div class="font-bold">낭만 노을</div>
+                            <div class="text-[10px] text-navy/60">오렌지 노을빛 해변</div>
+                        </div>
+                    </button>
+                    <button onclick="changeWeather('night')" class="bg-white/80 hover:bg-white p-2.5 rounded-2xl flex items-center gap-2 border shadow-sm">
+                        <span class="text-2xl">🌙</span>
+                        <div class="text-left">
+                            <div class="font-bold">야광 밤바다</div>
+                            <div class="text-[10px] text-navy/60">은은한 별빛과 야경</div>
+                        </div>
+                    </button>
+                    <button onclick="changeWeather('rainy')" class="bg-white/80 hover:bg-white p-2.5 rounded-2xl flex items-center gap-2 border shadow-sm">
+                        <span class="text-2xl">🌧️</span>
+                        <div class="text-left">
+                            <div class="font-bold">비 오는 날</div>
+                            <div class="text-[10px] text-navy/60">시원한 바닷가 소나기</div>
+                        </div>
+                    </button>
+                    <button onclick="changeWeather('snowy')" class="bg-white/80 hover:bg-white p-2.5 rounded-2xl flex items-center gap-2 border shadow-sm col-span-1 sm:col-span-2">
+                        <span class="text-2xl">❄️</span>
+                        <div class="text-left">
+                            <div class="font-bold">포근한 눈 오는 날</div>
+                            <div class="text-[10px] text-navy/60">해변 위 흩날리는 하얀 눈꽃</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-right mt-3">
                 <button onclick="closeShopModal()" class="px-5 py-2 rounded-xl bg-coral text-white font-bold text-xs shadow">닫기</button>
             </div>
         </div>
@@ -666,7 +704,6 @@
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        // Gemini API Runtime Contract
         const apiKey = "";
 
         // --- GLOBAL APP STATE ---
@@ -674,23 +711,24 @@
             officeCode: "J10",
             schoolCode: "7530085",
             schoolName: "해변여름고등학교",
-            neisApiKey: "", // User can input in settings
+            neisApiKey: "",
             shells: 12,
             candies: 45,
             itemsOwned: {
                 sunglasses: false,
                 hat: false,
-                tube: false
+                fishTheme: false,
+                dolphinTheme: false
             },
+            currentWeather: 'sunny', // 'sunny', 'sunset', 'night', 'rainy', 'snowy'
             audioMuted: true,
             currentMonth: new Date(),
             schedules: {},
             meals: []
         };
 
-        // Audio Context & Sound Synthesis Setup
+        // Audio Context Setup
         let audioCtx = null;
-
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -723,9 +761,7 @@
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.2);
                 }
-            } catch (e) {
-                console.log('Audio play error', e);
-            }
+            } catch (e) {}
         }
 
         function toggleAudio() {
@@ -739,7 +775,9 @@
             }
         }
 
-        // --- DYNAMIC BACKGROUND CANVAS (Shimmer Reflection) ---
+        // --- MULTI-WEATHER CANVAS SYSTEM (Sparkles Yoonseul / Rain / Snow / Night Stars) ---
+        let canvasParticles = [];
+
         function initCanvas() {
             const canvas = document.getElementById('bgCanvas');
             const ctx = canvas.getContext('2d');
@@ -749,56 +787,170 @@
             window.addEventListener('resize', () => {
                 width = canvas.width = window.innerWidth;
                 height = canvas.height = window.innerHeight;
+                createParticles(width, height);
             });
 
-            const sparkles = Array.from({ length: 30 }, () => ({
-                x: Math.random() * width,
-                y: height * 0.45 + Math.random() * (height * 0.25),
-                size: Math.random() * 3 + 1,
-                alpha: Math.random(),
-                speed: Math.random() * 0.02 + 0.005
-            }));
+            function createParticles(w, h) {
+                canvasParticles = [];
+                const weather = appState.currentWeather;
+
+                if (weather === 'sunny' || weather === 'sunset') {
+                    // Yoonseul Water Sparkles
+                    for (let i = 0; i < 70; i++) {
+                        canvasParticles.push({
+                            x: Math.random() * w,
+                            y: h * 0.45 + Math.random() * (h * 0.23),
+                            size: Math.random() * 4.5 + 1.2,
+                            alpha: Math.random(),
+                            speed: Math.random() * 0.03 + 0.008,
+                            length: Math.random() * 14 + 5
+                        });
+                    }
+                } else if (weather === 'rainy') {
+                    // Rain drops
+                    for (let i = 0; i < 90; i++) {
+                        canvasParticles.push({
+                            x: Math.random() * w,
+                            y: Math.random() * h,
+                            length: Math.random() * 20 + 10,
+                            speed: Math.random() * 12 + 10,
+                            alpha: Math.random() * 0.6 + 0.3
+                        });
+                    }
+                } else if (weather === 'snowy') {
+                    // Snow flakes
+                    for (let i = 0; i < 80; i++) {
+                        canvasParticles.push({
+                            x: Math.random() * w,
+                            y: Math.random() * h,
+                            radius: Math.random() * 3.5 + 1,
+                            density: Math.random() * 1,
+                            speed: Math.random() * 1.5 + 0.5
+                        });
+                    }
+                } else if (weather === 'night') {
+                    // Night Stars & Fireflies
+                    for (let i = 0; i < 60; i++) {
+                        canvasParticles.push({
+                            x: Math.random() * w,
+                            y: Math.random() * (h * 0.6),
+                            radius: Math.random() * 2 + 0.5,
+                            alpha: Math.random(),
+                            speed: Math.random() * 0.02 + 0.005
+                        });
+                    }
+                }
+            }
+
+            createParticles(width, height);
 
             function draw() {
                 ctx.clearRect(0, 0, width, height);
+                const weather = appState.currentWeather;
 
-                // Draw Sun Glitter on Water
-                sparkles.forEach(s => {
-                    s.alpha += s.speed;
-                    if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
-                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha) * 0.8})`;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                    ctx.fill();
-                });
+                if (weather === 'sunny' || weather === 'sunset') {
+                    canvasParticles.forEach(s => {
+                        s.alpha += s.speed;
+                        if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+
+                        ctx.save();
+                        ctx.fillStyle = weather === 'sunset' ? `rgba(255, 230, 200, ${Math.abs(s.alpha) * 0.9})` : `rgba(255, 255, 255, ${Math.abs(s.alpha) * 0.9})`;
+                        ctx.shadowBlur = 8;
+                        ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
+                        ctx.beginPath();
+                        ctx.ellipse(s.x, s.y, s.length, s.size, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    });
+                } else if (weather === 'rainy') {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.lineCap = 'round';
+
+                    canvasParticles.forEach(p => {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p.x - 3, p.y + p.length);
+                        ctx.stroke();
+
+                        p.y += p.speed;
+                        p.x -= 0.5;
+
+                        if (p.y > height) {
+                            p.y = -20;
+                            p.x = Math.random() * width;
+                        }
+                    });
+                } else if (weather === 'snowy') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    canvasParticles.forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2, true);
+                        ctx.fill();
+
+                        p.y += p.speed;
+                        p.x += Math.sin(p.y * 0.02) * 0.5;
+
+                        if (p.y > height) {
+                            p.y = -10;
+                            p.x = Math.random() * width;
+                        }
+                    });
+                } else if (weather === 'night') {
+                    canvasParticles.forEach(s => {
+                        s.alpha += s.speed;
+                        if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+
+                        ctx.save();
+                        ctx.fillStyle = `rgba(255, 255, 220, ${Math.abs(s.alpha) * 0.95})`;
+                        ctx.shadowBlur = 6;
+                        ctx.shadowColor = "#FFFF88";
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    });
+                }
 
                 requestAnimationFrame(draw);
             }
             draw();
+
+            window.recreateCanvasParticles = () => createParticles(width, height);
         }
 
-        // --- TIME OF DAY SYSTEM ---
-        function updateTimeOfDay() {
-            const hour = new Date().getHours();
+        // --- CHANGE WEATHER ---
+        function changeWeather(weatherMode) {
+            playSound('coin');
+            appState.currentWeather = weatherMode;
+
             const bgLayer = document.getElementById('bgLayer');
             const celestial = document.getElementById('celestial');
 
-            if (hour >= 6 && hour < 11) {
-                // Morning
-                bgLayer.className = bgLayer.className.replace(/bg-\[\#[^\]]+\]/g, '') + ' bg-sky';
-                celestial.className = "absolute top-12 right-16 w-16 h-16 rounded-full bg-amber-200 shadow-[0_0_40px_#FDE68A] transition-all duration-1000 anim-float";
-            } else if (hour >= 11 && hour < 17) {
-                // Day
-                bgLayer.className = bgLayer.className.replace(/bg-\[\#[^\]]+\]/g, '') + ' bg-sky';
-                celestial.className = "absolute top-8 right-12 w-20 h-20 rounded-full bg-sunYellow shadow-[0_0_50px_#FFD34D] transition-all duration-1000 anim-float";
-            } else if (hour >= 17 && hour < 20) {
-                // Sunset
-                bgLayer.className = bgLayer.className.replace(/bg-\[\#[^\]]+\]/g, '') + ' bg-gradient-to-b from-orange-300 via-rose-300 to-sky';
+            if (weatherMode === 'sunset') {
+                bgLayer.className = "fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-gradient-to-b from-orange-300 via-rose-300 to-sand";
                 celestial.className = "absolute top-20 right-20 w-24 h-24 rounded-full bg-rose-400 shadow-[0_0_60px_#FB7185] transition-all duration-1000 anim-float";
-            } else {
-                // Night
-                bgLayer.className = bgLayer.className.replace(/bg-\[\#[^\]]+\]/g, '') + ' bg-gradient-to-b from-indigo-950 via-slate-900 to-navy';
+                setBunnySpeech("🌅 오렌지 노을이 물든 시원한 노을 해변이야!");
+            } else if (weatherMode === 'night') {
+                bgLayer.className = "fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-gradient-to-b from-indigo-950 via-slate-900 to-navy";
                 celestial.className = "absolute top-10 right-16 w-16 h-16 rounded-full bg-slate-100 shadow-[0_0_40px_#FFFFFF] transition-all duration-1000 anim-float";
+                setBunnySpeech("🌙 별들이 반짝이는 은은한 밤바다 야경이야!");
+            } else if (weatherMode === 'rainy') {
+                bgLayer.className = "fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-gradient-to-b from-slate-500 via-sky-700 to-slate-800";
+                celestial.className = "hidden";
+                setBunnySpeech("🌧️ 파도 소리와 함께 시원한 바닷가 소나기가 내리고 있어!");
+            } else if (weatherMode === 'snowy') {
+                bgLayer.className = "fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-gradient-to-b from-sky-200 via-cyan-300 to-sand";
+                celestial.className = "absolute top-8 right-12 w-20 h-20 rounded-full bg-amber-100 shadow-[0_0_40px_#FFF] transition-all duration-1000 anim-float";
+                setBunnySpeech("❄️ 우와! 여름 해변 위에 로맨틱한 하얀 눈꽃이 내려!");
+            } else {
+                bgLayer.className = "fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-1000 bg-sky";
+                celestial.className = "absolute top-8 right-12 w-20 h-20 rounded-full bg-sunYellow shadow-[0_0_50px_#FFD34D] transition-all duration-1000 anim-float";
+                setBunnySpeech("☀️ 햇살이 쨍쨍하고 바다 윤슬이 반짝이는 맑은 해변이야!");
+            }
+
+            if (window.recreateCanvasParticles) {
+                window.recreateCanvasParticles();
             }
         }
 
@@ -817,109 +969,98 @@
             activeBtn.classList.add('glass-card', 'opacity-100');
         }
 
-        // --- SAMPLE DATA PROVIDER (Fallback when NEIS key not provided/or server limits) ---
-        function getSampleSchedules(year, month) {
-            const yearMonthStr = `${year}${String(month).padStart(2, '0')}`;
-            return {
-                [`${yearMonthStr}05`]: { name: "여름 하모니 현장체험학습 🚌", type: "🚌" },
-                [`${yearMonthStr}10`]: { name: "1학기 기말고사 시작 📚", type: "📚" },
-                [`${yearMonthStr}11`]: { name: "1학기 기말고사 📚", type: "📚" },
-                [`${yearMonthStr}12`]: { name: "1학기 기말고사 종료 📚", type: "📚" },
-                [`${yearMonthStr}17`]: { name: "여름 바다 축제 🎆", type: "🎆" },
-                [`${yearMonthStr}22`]: { name: "여름방학식 🏖️", type: "🏖️" },
-                [`${yearMonthStr}27`]: { name: "동아리 해변 캠프 🏃", type: "🏃" }
-            };
-        }
-
-        function getSampleMeals() {
-            return [
-                { date: "07/27 (월)", menu: "해물볶음밥, 꼬치어묵국, 수제치즈핫도그, 열무김치, 시원한 수박화채 🍉", cal: "650 kcal" },
-                { date: "07/28 (화)", menu: "차조밥, 쇠고기미역국, 춘천닭갈비, 계란말이, 배추김치, 생과일 에이드 🍹", cal: "680 kcal" },
-                { date: "07/29 (수)", menu: "수제치즈버거, 프렌치프라이, 콘샐러드, 피클, 청포도 에이드 🍔", cal: "710 kcal" },
-                { date: "07/30 (목)", menu: "현미밥, 돈육김치찌개, 해물파전, 콩나물무침, 깍두기, 아이스크림 🍦", cal: "620 kcal" },
-                { date: "07/31 (금)", menu: "해산물파스타, 마늘바게트, 양상추샐러드, 수제오이피클, 망고 스무디 🥭", cal: "640 kcal" }
-            ];
-        }
-
         // --- NEIS API FETCH FUNCTIONS ---
         async function fetchAcademicSchedule(year, month) {
-            const yearMonthStr = `${year}${String(month).padStart(2, '0')}`;
+            const monthStr = String(month).padStart(2, '0');
+            const lastDate = new Date(year, month, 0).getDate();
+            const fromYmd = `${year}${monthStr}01`;
+            const toYmd = `${year}${monthStr}${String(lastDate).padStart(2, '0')}`;
 
-            if (!appState.neisApiKey) {
-                appState.schedules = getSampleSchedules(year, month);
-                renderCalendar();
-                updateHomeTodayCards();
-                return;
-            }
-
-            const url = `https://open.neis.go.kr/hub/SchoolSchedule?KEY=${appState.neisApiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=${appState.officeCode}&SD_SCHUL_CODE=${appState.schoolCode}&AA_YMD=${yearMonthStr}`;
-
-            let retries = 5;
-            let delay = 1000;
-            while (retries > 0) {
-                try {
-                    const res = await fetch(url);
-                    const data = await res.json();
-                    if (data.SchoolSchedule) {
-                        const list = data.SchoolSchedule[1].row;
-                        const map = {};
-                        list.forEach(item => {
-                            let type = "📌";
-                            if (item.EVENT_NM.includes("고사") || item.EVENT_NM.includes("시험")) type = "📚";
-                            else if (item.EVENT_NM.includes("방학")) type = "🏖️";
-                            else if (item.EVENT_NM.includes("축제")) type = "🎆";
-                            else if (item.EVENT_NM.includes("체육")) type = "🏃";
-                            else if (item.EVENT_NM.includes("체험")) type = "🚌";
-
-                            map[item.AA_YMD] = { name: item.EVENT_NM, type };
-                        });
-                        appState.schedules = map;
-                    } else {
-                        appState.schedules = getSampleSchedules(year, month);
-                    }
-                    renderCalendar();
-                    updateHomeTodayCards();
-                    return;
-                } catch (e) {
-                    retries--;
-                    if (retries === 0) {
-                        appState.schedules = getSampleSchedules(year, month);
-                        renderCalendar();
-                        updateHomeTodayCards();
-                    }
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
-                }
-            }
-        }
-
-        async function fetchWeeklyMeals() {
-            if (!appState.neisApiKey) {
-                appState.meals = getSampleMeals();
-                renderMeals();
-                updateHomeTodayCards();
-                return;
-            }
-
-            const today = new Date();
-            const ymd = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
-            const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${appState.neisApiKey}&Type=json&pIndex=1&pSize=10&ATPT_OFCDC_SC_CODE=${appState.officeCode}&SD_SCHUL_CODE=${appState.schoolCode}&MLSV_YMD=${ymd}`;
+            const keyParam = appState.neisApiKey ? `KEY=${appState.neisApiKey}&` : '';
+            const url = `https://open.neis.go.kr/hub/SchoolSchedule?${keyParam}Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=${appState.officeCode}&SD_SCHUL_CODE=${appState.schoolCode}&AA_FROM_YMD=${fromYmd}&AA_TO_YMD=${toYmd}`;
 
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                if (data.mealServiceDietInfo) {
+                const map = {};
+
+                if (data.SchoolSchedule && data.SchoolSchedule[1]?.row) {
+                    const list = data.SchoolSchedule[1].row;
+                    list.forEach(item => {
+                        if (!item.EVENT_NM || item.EVENT_NM.trim() === '') return;
+                        
+                        let type = "📌";
+                        if (item.EVENT_NM.includes("고사") || item.EVENT_NM.includes("시험") || item.EVENT_NM.includes("평가")) type = "📚";
+                        else if (item.EVENT_NM.includes("방학")) type = "🏖️";
+                        else if (item.EVENT_NM.includes("축제") || item.EVENT_NM.includes("체육") || item.EVENT_NM.includes("대회")) type = "🎆";
+                        else if (item.EVENT_NM.includes("체험") || item.EVENT_NM.includes("수련") || item.EVENT_NM.includes("견학")) type = "🚌";
+                        else if (item.EVENT_NM.includes("졸업") || item.EVENT_NM.includes("입학")) type = "🎓";
+
+                        map[item.AA_YMD] = { name: item.EVENT_NM, type };
+                    });
+                }
+                appState.schedules = map;
+            } catch (e) {
+                appState.schedules = {};
+            }
+            renderCalendar();
+            updateHomeTodayCards();
+        }
+
+        function getCurrentWeekDateRange() {
+            const curr = new Date();
+            const first = curr.getDate() - curr.getDay() + 1;
+            const last = first + 4;
+
+            const monday = new Date(curr.setDate(first));
+            const friday = new Date(curr.setDate(last));
+
+            const formatYMD = (d) => {
+                return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            };
+
+            return {
+                fromYmd: formatYMD(monday),
+                toYmd: formatYMD(friday)
+            };
+        }
+
+        async function fetchWeeklyMeals() {
+            const { fromYmd, toYmd } = getCurrentWeekDateRange();
+            const keyParam = appState.neisApiKey ? `KEY=${appState.neisApiKey}&` : '';
+            const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?${keyParam}Type=json&pIndex=1&pSize=20&ATPT_OFCDC_SC_CODE=${appState.officeCode}&SD_SCHUL_CODE=${appState.schoolCode}&MLSV_FROM_YMD=${fromYmd}&MLSV_TO_YMD=${toYmd}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.mealServiceDietInfo && data.mealServiceDietInfo[1]?.row) {
                     const list = data.mealServiceDietInfo[1].row;
-                    appState.meals = list.map(item => ({
-                        date: `${item.MLSV_YMD.substring(4,6)}/${item.MLSV_YMD.substring(6,8)}`,
-                        menu: item.DDISH_NM.replace(/<br\/>/g, ', ').replace(/[0-9\.]/g, ''),
-                        cal: item.CAL_INFO
-                    }));
+                    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+
+                    appState.meals = list.map(item => {
+                        const y = parseInt(item.MLSV_YMD.substring(0, 4));
+                        const m = parseInt(item.MLSV_YMD.substring(4, 6));
+                        const d = parseInt(item.MLSV_YMD.substring(6, 8));
+                        const dayName = daysOfWeek[new Date(y, m - 1, d).getDay()];
+
+                        const cleanMenu = item.DDISH_NM
+                            .replace(/\([0-9\.]+\)/g, '')
+                            .replace(/<br\/>/g, ', ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+
+                        return {
+                            date: `${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')} (${dayName})`,
+                            menu: cleanMenu,
+                            cal: item.CAL_INFO || '정보없음'
+                        };
+                    });
                 } else {
-                    appState.meals = getSampleMeals();
+                    appState.meals = [];
                 }
             } catch (e) {
-                appState.meals = getSampleMeals();
+                appState.meals = [];
             }
             renderMeals();
             updateHomeTodayCards();
@@ -991,13 +1132,24 @@
             const container = document.getElementById('weeklyMealContainer');
             container.innerHTML = '';
 
+            if (!appState.meals || appState.meals.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full glass-card p-6 rounded-3xl text-center flex flex-col items-center gap-2">
+                        <span class="text-4xl">🏖️</span>
+                        <div class="font-bold text-navy text-base">신나는 여름방학/휴업일 기간입니다!</div>
+                        <p class="text-xs text-navy/70">이번 주 등록된 급식 메뉴가 없어서 토끼와 바닷가 맛집에 놀러갈 시간이에요!</p>
+                    </div>
+                `;
+                return;
+            }
+
             appState.meals.forEach(m => {
                 const card = document.createElement('div');
                 card.className = "glass-card rounded-2xl p-3.5 flex flex-col justify-between gap-2 border border-white/80 hover:scale-102 transition-transform";
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-navy/10 pb-1.5">
                         <span class="font-bold text-xs md:text-sm text-navy">${m.date}</span>
-                        <span class="text-[10px] font-semibold text-coral bg-coral/10 px-2 py-0.5 rounded-full">${m.cal || '650 kcal'}</span>
+                        <span class="text-[10px] font-semibold text-coral bg-coral/10 px-2 py-0.5 rounded-full">${m.cal || ''}</span>
                     </div>
                     <p class="text-xs text-navy/90 font-medium leading-relaxed my-1">
                         ${m.menu}
@@ -1017,7 +1169,7 @@
             setBunnySpeech(`😋 ${date} 급식 정말 맛있겠다! 별사탕 2개 적립! ⭐`);
         }
 
-        // --- HOME SCREEN UPDATE ---
+        // --- HOME TODAY CARDS UPDATE ---
         function updateHomeTodayCards() {
             const today = new Date();
             const ymdKey = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
@@ -1031,15 +1183,15 @@
 
             const mealBox = document.getElementById('todayMealBox');
             if (appState.meals && appState.meals.length > 0) {
-                mealBox.innerHTML = `🍱 ${appState.meals[0].menu}`;
+                mealBox.innerHTML = `🍱 <strong>[${appState.meals[0].date}]</strong> ${appState.meals[0].menu}`;
             } else {
-                mealBox.innerHTML = `🍱 맛있는 급식 메뉴를 불러오는 중입니다.`;
+                mealBox.innerHTML = `🏖️ 방학 기간이라 급식이 없어요! 즐거운 휴가 보내세요!`;
             }
 
             document.getElementById('todayDateStr').textContent = `${today.getFullYear()}.${today.getMonth()+1}.${today.getDate()} (${['일','월','화','수','목','금','토'][today.getDay()]})`;
         }
 
-        // --- PET INTERACTION & PET CARE ---
+        // --- PET INTERACTION & PET CARE (FEED / SLEEP / DANCE) ---
         function setBunnySpeech(text) {
             const speechBox = document.getElementById('bunnySpeech');
             const speechText = document.getElementById('speechText');
@@ -1052,12 +1204,11 @@
         function interactBunny() {
             playSound('bubble');
             const responses = [
-                "야호! 같이 모래성 쌓고 놀까? 🏖️",
-                "바닷바람이 정말 시원해! 😊",
+                "야호! 바닷바람이 정말 시원해! 😊",
                 "배고프다! 맛있는 거 먹으러 가자 🍦",
                 "학사일정 확인하고 조개 모았어? 🐚",
                 "나 오늘 그을린 피부 어때? 예쁘지? ✨",
-                "바다에 돌고래 튀어오르는 거 봤어? 🐬"
+                "바다에 반짝이는 윤슬 구경하자! 🌊"
             ];
             const rand = responses[Math.floor(Math.random() * responses.length)];
             setBunnySpeech(rand);
@@ -1068,16 +1219,37 @@
 
         function petAction(type) {
             playSound('coin');
+            const bunnyGraphic = document.getElementById('bunnyGraphic');
+            const eyesNormal = document.getElementById('eyesNormal');
+            const eyesSleeping = document.getElementById('eyesSleeping');
+            const zzzBubble = document.getElementById('zzzBubble');
+            const icecreamAcc = document.getElementById('acc-icecream');
+            const petStateText = document.getElementById('petStateText');
+
+            bunnyGraphic.className = "relative w-44 h-44 md:w-56 md:h-56";
+            eyesNormal.classList.remove('hidden');
+            eyesSleeping.classList.add('hidden');
+            zzzBubble.classList.add('hidden');
+            icecreamAcc.classList.add('hidden');
+
             if (type === 'feed') {
-                setBunnySpeech("🍦 와아! 맛있는 아이스크림이다! 고마워!");
-                document.getElementById('petStateText').textContent = "🍦 아이스크림 냠냠";
-            } else if (type === 'play') {
-                setBunnySpeech("🏖️ 모래성 만들기 대성공! 진짜 재미있다!");
-                document.getElementById('petStateText').textContent = "🏖️ 모래성 쌓는 중";
+                icecreamAcc.classList.remove('hidden');
+                bunnyGraphic.classList.add('anim-bunny-bounce');
+                setBunnySpeech("🍦 와아! 맛있는 소프트 아이스크림이다! 고마워 냠냠!");
+                petStateText.textContent = "🍦 아이스크림 냠냠";
+            } else if (type === 'sleep') {
+                eyesNormal.classList.add('hidden');
+                eyesSleeping.classList.remove('hidden');
+                zzzBubble.classList.remove('hidden');
+                bunnyGraphic.classList.add('anim-bunny-sleep');
+                setBunnySpeech("😴 모래사장 그늘 아래서 사르르 낮잠 자는 중... Zzz");
+                petStateText.textContent = "😴 모래사장 낮잠 타임";
             } else if (type === 'dance') {
-                setBunnySpeech("💃 신나는 훌라춤을 추자! 흔들흔들 ~ 🎵");
-                document.getElementById('petStateText').textContent = "💃 신나게 댄스 타임";
+                bunnyGraphic.classList.add('anim-bunny-dance');
+                setBunnySpeech("💃 신나는 훌라춤을 추자! 둠칫둠칫 ~ 🎵🎉");
+                petStateText.textContent = "💃 신나게 댄스 타임";
             }
+
             appState.candies += 3;
             document.getElementById('candyCount').textContent = appState.candies;
         }
@@ -1099,7 +1271,7 @@
             alert("📜 파도에 떠내려온 유리병 편지를 열었습니다!\n\n'여름 캠퍼스에 온 걸 환영해!'\n🎁 보상: 조개 5개 + 별사탕 10개 획득!");
         }
 
-        // --- SHOP & ACCESSORY SYSTEM ---
+        // --- SHOP & ACCESSORY & ANIMAL SELECTION ---
         function openShopModal() {
             playSound('bubble');
             document.getElementById('shopModal').classList.remove('hidden');
@@ -1118,75 +1290,105 @@
             appState.itemsOwned[itemKey] = true;
             document.getElementById('candyCount').textContent = appState.candies;
 
-            document.getElementById(`acc-${itemKey}`).classList.remove('hidden');
+            if (itemKey === 'sunglasses' || itemKey === 'hat') {
+                document.getElementById(`acc-${itemKey}`).classList.remove('hidden');
+            }
 
             const btn = document.getElementById(`btn-item-${itemKey}`);
-            btn.innerText = "착용 중";
-            btn.disabled = true;
-            btn.className = "bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow cursor-default";
+            if (btn) {
+                btn.innerText = "착용 중";
+                btn.disabled = true;
+                btn.className = "bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow cursor-default";
+            }
 
-            setBunnySpeech(`✨ 새로운 아이템을 선물해줘서 고마워!! 너무 마음에 들어! 💖`);
+            setBunnySpeech(`✨ 예쁜 액세서리를 선물해줘서 고마워!! 💖`);
+        }
+
+        // Toggle Ocean Animals (Dolphin / Fish)
+        function toggleOceanAnimal(animalKey) {
+            const cost = animalKey === 'dolphinTheme' ? 20 : 15;
+            if (!appState.itemsOwned[animalKey]) {
+                if (appState.candies < cost) {
+                    alert("별사탕이 부족해요!");
+                    return;
+                }
+                appState.candies -= cost;
+                appState.itemsOwned[animalKey] = true;
+                document.getElementById('candyCount').textContent = appState.candies;
+            }
+
+            playSound('coin');
+            if (animalKey === 'dolphinTheme') {
+                const el = document.getElementById('dolphinContainer');
+                el.classList.remove('hidden');
+                setBunnySpeech("🐬 우와! 아기 돌고래가 바다 위로 점프해!!");
+            } else if (animalKey === 'fishTheme') {
+                const el = document.getElementById('fishContainer');
+                el.classList.remove('hidden');
+                setBunnySpeech("🐠 바닷속에 알록달록 예쁜 열대어 무리가 헤엄치기 시작했어!");
+            }
+
+            const btn = document.getElementById(`btn-item-${animalKey}`);
+            if (btn) {
+                btn.innerText = "소환 중";
+                btn.disabled = true;
+                btn.className = "bg-emerald-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow cursor-default";
+            }
         }
 
         // --- SMART LOCAL AI FALLBACK ENGINE ---
         function generateLocalResponse(query) {
             const q = query.toLowerCase();
 
-            // 1. Meal Query
             if (q.includes('급식') || q.includes('밥') || q.includes('점심') || q.includes('메뉴') || q.includes('식단')) {
                 if (appState.meals && appState.meals.length > 0) {
                     const todayMeal = appState.meals[0];
                     return `오늘 급식 메뉴는 [${todayMeal.menu}]이야! 맛있게 먹고 힘내자 😋🍴`;
                 }
-                return "이번 주 급식 식단표를 확인해봤는데, 정말 맛있고 신나는 메뉴들이 가득해! 🍱";
+                return "지금은 신나는 여름방학/휴업일 기간이라 급식이 없어! 맛있는 간식 먹으러 가자 🍦🏖️";
             }
 
-            // 2. Exam / Test Query
-            if (q.includes('시험') || q.includes('고사') || q.includes('기말') || q.includes('중간')) {
+            if (q.includes('시험') || q.includes('고사') || q.includes('기말') || q.includes('중간') || q.includes('평가')) {
                 for (const [date, item] of Object.entries(appState.schedules)) {
-                    if (item.name.includes('시험') || item.name.includes('고사')) {
+                    if (item.name.includes('시험') || item.name.includes('고사') || item.name.includes('평가')) {
                         const month = date.substring(4, 6);
                         const day = date.substring(6, 8);
-                        return `시험 일정은 ${parseInt(month)}월 ${parseInt(day)}일 (${item.name})이야! 우리 차근차근 공부하면 다 잘할 수 있어! 📚✨`;
+                        return `시험 일정은 ${parseInt(month)}월 ${parseInt(day)}일 (${item.name})이야! 차근차근 준비하자 📚✨`;
                     }
                 }
-                return "다행히 당분간 큰 시험 일정은 없어! 바닷가에서 마음 편히 놀자 😊📚";
+                return "확인해봤는데 당분간 시험 일정은 없어! 마음 편히 여름을 즐기자 😊📚";
             }
 
-            // 3. Vacation / Holiday Query
             if (q.includes('방학') || q.includes('휴가')) {
                 for (const [date, item] of Object.entries(appState.schedules)) {
                     if (item.name.includes('방학')) {
                         const month = date.substring(4, 6);
                         const day = date.substring(6, 8);
-                        return `기다리던 여름방학은 ${parseInt(month)}월 ${parseInt(day)}일이야! 바다로 떠날 생각에 벌써 기대돼 🏖️🎉`;
+                        return `방학 일정은 ${parseInt(month)}월 ${parseInt(day)}일이야! 시원한 바다에서 놀 준비하자 🏖️🎉`;
                     }
                 }
-                return "방학이 오면 바다에서 물장구도 치고 조개도 주우면서 신나게 놀 준비하자 🌊";
+                return "지금은 이미 신나는 방학 시즌이야! 나랑 모래사장에서 놀자 🌊";
             }
 
-            // 4. Today / Daily Schedule Query
             if (q.includes('오늘') || q.includes('일정') || q.includes('뭐해') || q.includes('뭐 해')) {
                 const today = new Date();
                 const ymdKey = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
                 if (appState.schedules[ymdKey]) {
-                    return `오늘 학사일정은 [${appState.schedules[ymdKey].name}]이야! 우리 함께 활기차게 보내자 🎈`;
+                    return `오늘 학사일정은 [${appState.schedules[ymdKey].name}]이야! 활기차게 보내자 🎈`;
                 }
-                return "오늘은 특별한 학사일정이 없네! 나랑 시원한 바닷가에서 모래성 쌓으면서 놀자 🏖️✨";
+                return "오늘은 특별한 학사일정이 없네! 시원한 바닷가에서 즐거운 마음으로 놀자 🏖️✨";
             }
 
-            // Default Friendly Response
-            return `${appState.schoolName} 캠퍼스에서 너와 함께 지내서 정말 기뻐! 궁금한 일정이나 급식은 언제든 나한테 물어봐줘 🐰💖`;
+            return `${appState.schoolName} 캠퍼스에서 너와 함께 지내서 정말 기뻐! 궁금한 일정이나 급식은 언제든 물어봐줘 🐰💖`;
         }
 
-        // --- GEMINI API + SMART FALLBACK CHAT INTEGRATION ---
         async function callGeminiAPI(query) {
             const schedContext = JSON.stringify(appState.schedules);
             const mealContext = JSON.stringify(appState.meals);
 
             const prompt = `
-너는 'Bunny Summer Campus'에 살고 있는 해변을 좋아하는 태닝한 토끼 다마고치 캐릭터야.
-항상 밝고 친근하며, 말투는 (~해!, ~했어!, 😊, 🏖️ 등 귀여운 로봇/친구 말투)를 써.
+너는 'Bunny Summer Campus'에 살고 있는 해변을 좋아하는 태닝한 토끼 캐릭터야.
+말투는 (~해!, ~했어!, 😊, 🏖️ 등 귀여운 친구 말투)를 써.
 
 현재 사용자 학교 이름: ${appState.schoolName}
 학사 일정 데이터: ${schedContext}
@@ -1194,10 +1396,10 @@
 
 사용자 질문: "${query}"
 
-위 학사일정과 급식 데이터를 참고해서 친구처럼 상냥하게 답변해줘. 만약 관련 정보가 명확히 없다면, 귀엽게 모른다고 하고 함께 바다에서 놀자고 이야기해줘. 2-3문장 이내로 짧고 명확하게 응답해.
+위 학사일정과 급식 데이터를 참고해서 친절하게 답해줘. 급식이 없거나 방학이면 방학이라 급식이 없다고 이야기해줘. 2문장 이내로 작성해.
             `;
 
-            let retries = 5;
+            let retries = 3;
             let delay = 1000;
 
             while (retries > 0) {
@@ -1215,9 +1417,7 @@
                         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
                         if (text) return text;
                     }
-                } catch (e) {
-                    // Backoff and Retry
-                }
+                } catch (e) {}
 
                 retries--;
                 if (retries > 0) {
@@ -1226,7 +1426,6 @@
                 }
             }
 
-            // Fallback to local intelligent response engine if API is unreachable
             return generateLocalResponse(query);
         }
 
@@ -1285,7 +1484,7 @@
             return msgId;
         }
 
-        // --- SETTINGS & SCHOOL SEARCH MODAL ---
+        // --- SETTINGS MODAL ---
         function openSettingsModal() {
             playSound('bubble');
             document.getElementById('settingsModal').classList.remove('hidden');
@@ -1307,12 +1506,13 @@
             resultsContainer.innerHTML = `<div class="text-white/60 text-center py-2">검색 중...</div>`;
 
             const apiKeyToUse = document.getElementById('apiKeyInput').value.trim() || appState.neisApiKey;
-            const url = `https://open.neis.go.kr/hub/schoolInfo?KEY=${apiKeyToUse}&Type=json&pIndex=1&pSize=10&ATPT_OFCDC_SC_CODE=${officeCode}&SCHUL_NM=${encodeURIComponent(schoolName)}`;
+            const keyParam = apiKeyToUse ? `KEY=${apiKeyToUse}&` : '';
+            const url = `https://open.neis.go.kr/hub/schoolInfo?${keyParam}Type=json&pIndex=1&pSize=10&ATPT_OFCDC_SC_CODE=${officeCode}&SCHUL_NM=${encodeURIComponent(schoolName)}`;
 
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                if (data.schoolInfo) {
+                if (data.schoolInfo && data.schoolInfo[1]?.row) {
                     const rows = data.schoolInfo[1].row;
                     resultsContainer.innerHTML = '';
                     rows.forEach(r => {
@@ -1329,18 +1529,10 @@
                         resultsContainer.appendChild(item);
                     });
                 } else {
-                    resultsContainer.innerHTML = `<div class="text-white/60 text-center py-2">검색 결과가 없습니다. (샘플 데이터 모드로 진행 가능)</div>`;
+                    resultsContainer.innerHTML = `<div class="text-white/60 text-center py-2">검색 결과가 없습니다. 다시 확인해 주세요.</div>`;
                 }
             } catch (e) {
-                resultsContainer.innerHTML = `
-                    <div class="p-2 bg-white/10 hover:bg-white/20 rounded-lg cursor-pointer flex justify-between items-center" onclick="selectSchool('7530085', '${schoolName}', '${officeCode}')">
-                        <div>
-                            <div class="font-bold text-white">${schoolName}</div>
-                            <div class="text-[10px] text-white/60">샘플 모드로 선택하기</div>
-                        </div>
-                        <span class="text-xs text-sunYellow font-bold">선택</span>
-                    </div>
-                `;
+                resultsContainer.innerHTML = `<div class="text-white/60 text-center py-2">검색 중 오류가 발생했습니다.</div>`;
             }
         }
 
@@ -1368,14 +1560,11 @@
         // --- INIT ON DOM READY ---
         window.onload = function() {
             initCanvas();
-            updateTimeOfDay();
 
             fetchAcademicSchedule(appState.currentMonth.getFullYear(), appState.currentMonth.getMonth() + 1);
             fetchWeeklyMeals();
 
             setTimeout(triggerRandomEvent, 2000);
-
-            setInterval(updateTimeOfDay, 60000);
         };
     </script>
 </body>
